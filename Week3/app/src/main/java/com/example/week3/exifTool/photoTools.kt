@@ -1,15 +1,13 @@
 package com.example.week3.exifTool
 
-import android.content.Context
-import androidx.exifinterface.media.ExifInterface
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.exifinterface.media.ExifInterface
+import com.example.week3.Detail
 import java.io.File
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
-import com.example.week3.R
 
 
 /**
@@ -62,7 +60,7 @@ class PhotoDetailPresenter(){
     }
 
 //    private fun populateExifProperties() {
-//        view.setExifDataList(exifTagsContainerList)
+//        view.setExifDataList(exifTagsList)
 //    }
 
     private fun setImageByGivenAPath() {
@@ -109,5 +107,65 @@ class PhotoDetailPresenter(){
                 ExifTagsContainer(othersList, Type.OTHER))
     }
 
+    private fun appendZeroIfNeeded(n: Int): String {
+        val s = n.toString()
+        if (s.length == 1)
+            return "0$s"
+        else
+            return s
+    }
+
+//    //TODO: refactor and clean code.
+//    fun changeExifDate(year: Int, month: Int, dayOfMonth: Int) {
+//        val locationExifContainerList = exifTagsList.find { it.type == Type.DATE }?.list!!
+//        val dateTimeShort: String
+//        val dateTimeLong: String
+//
+//        if (locationExifContainerList.isEmpty()) {
+//            val df = SimpleDateFormat("HH:mm:ss")
+//            val calendar = Calendar.getInstance()
+//            dateTimeLong = "$year:${appendZeroIfNeeded(month)}:${appendZeroIfNeeded(dayOfMonth)} ${df.format(calendar.time)}"
+//            dateTimeShort = ""
+//        } else {
+//            val auxListLong = mutableListOf<ExifField>()
+//            locationExifContainerList.forEach {
+//                if (it.attribute.length > 10) auxListLong.add(it)
+//            }
+//            val actualDate = auxListLong.first().attribute.substring(11)
+//            dateTimeLong = "$year:${appendZeroIfNeeded(month)}:${appendZeroIfNeeded(dayOfMonth)} $actualDate"
+//            dateTimeShort = "$year:${appendZeroIfNeeded(month)}:${appendZeroIfNeeded(dayOfMonth)}"
+//        }
+//        try {
+//            if (locationExifContainerList.isEmpty()) {
+//                exifInterface.setAttribute(android.media.ExifInterface.TAG_DATETIME, dateTimeLong)
+//            } else {
+//                locationExifContainerList.forEach {
+//                    if (it.attribute.length > 10)
+//                        exifInterface.setAttribute(it.tag, dateTimeLong)
+//                    else
+//                        exifInterface.setAttribute(it.tag, dateTimeShort)
+//                }
+//            }
+//            exifInterface.saveAttributes()
+//
+//            computeTags()
+//            view.changeExifDataList(exifTagsList)
+//
+//            view.onCompleteDateChanged()
+//            Log.d(this.javaClass.simpleName, "Date was changed: year: $year  month: $month day: $dayOfMonth")
+//        } catch (e: IOException) {
+//            Log.e(this.javaClass.simpleName, "${e.cause} - ${e.message}")
+//            view.onError(view.getContext().resources.getString(R.string.date_changed_message_error))
+//        }
+//    }
+    fun setEXIFDate(datetime: String){
+        exifInterface.setAttribute(ExifInterface.TAG_DATETIME, datetime)
+        exifInterface.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, datetime)
+    try {
+        exifInterface.saveAttributes() //最后保存起来
+    } catch (e: IOException) {
+        Log.e("saveError", "Cannot save EXIF", e)
+    }
+    }
 
 }

@@ -49,6 +49,7 @@
     <string name="alert_item_open_map"> open a map</string>
     <string name="alert_item_remove_gps_tags"> remove the address</string>
     <string name="alert_item_edit"> edit them</string>
+    <string name="alert_item_remove_date"> remove date</string>
     <string name="alert_select_an_action"> select an action</string>
     <string name="text_copied_to_clipboard_message">Text successfully copied to clipboard</string>
 </resources>
