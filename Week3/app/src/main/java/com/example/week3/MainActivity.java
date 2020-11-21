@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // 初始化view， 添加listener
         super.onCreate(savedInstanceState);
         //load layout
         Log.i(TAG, "onCreate: create");
