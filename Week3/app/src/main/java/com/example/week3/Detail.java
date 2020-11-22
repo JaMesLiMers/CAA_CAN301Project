@@ -216,8 +216,11 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                         // "确定" 时：干些什么
                         // 两样东西存在lat 和 lon里面
                         // 需要设置和更新
+
+                        pre.setExifGPS(lat, lon);
                         pre.setLatitude(lat);
                         pre.setLongitude(lon);
+                        reloadUI();
                     }
                 });
         mapDialogBuilder.setNegativeButton("关闭",
@@ -271,5 +274,11 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                 .title("Marker to select"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
 
+    }
+
+    private void reloadUI(){
+        pre.initialize(getIntent());
+        setImage(pre.file.getName(),pre.imageUri);
+        setExifData(pre.exifTagsList);
     }
 }
