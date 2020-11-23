@@ -37,11 +37,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
+import java.util.Date;
 
 public class Detail extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private RecyclerView.Adapter mAdapter;
@@ -208,6 +210,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                 } else if(which ==1){
                     if(item.getType() == Type.GPS) openDialogMap(item); //打开地图
                     else if(item.getType() == Type.DATE) editDate(item); //修改日期
+                    else if (item.getType() == Type.CAMERA_PROPERTIES) editCamera(item);
                 } else if(which ==2){ //添加一个remove 日期选择
                     removeTags(item); //change with positive and negative action !!
                 }
@@ -272,13 +275,17 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                         mMonth = month;
                         mDay = dayOfMonth;
                         String dateString = mYear + ":" + (mMonth + 1) + ":" + mDay;
-                        String time = "";
+                        Date date = new Date();
+                        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+                        String time = formatter.format(date);
                         if (!(pre.getExifInterface().getAttribute(ExifInterface.TAG_DATETIME) == null)){
                             String[] list = pre.getExifInterface().getAttribute(ExifInterface.TAG_DATETIME).split(" ");
                             if (list.length == 2){
                                 time = list[1];
                             }
                         }
+
+
                         String dateTime = dateString + " " + time;
                         pre.setExifDate(dateTime);
                         reloadUI();
@@ -286,6 +293,10 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                 },
                 mYear, mMonth, mDay);
         datePickerDialog.show();
+
+    }
+
+    protected void editCamera(ExifTagsContainer item){
 
     }
     protected void removeTags(ExifTagsContainer item){
