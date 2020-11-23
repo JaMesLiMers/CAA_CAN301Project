@@ -1,6 +1,7 @@
 package com.example.week3;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
@@ -36,16 +38,27 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 public class Detail extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView recyclerView;
     private PhotoDetailPresenter pre = new PhotoDetailPresenter();
+
+
+
+    //Calendar
+    private int mYear;
+    private int mMonth;
+    private int mDay;
+
     private GoogleMap mMap;
     private AlertDialog mapDialog;
     private double lon = 0;
     private double lat = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +70,19 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         setExifData(pre.exifTagsList);
         getAddressByTriggerRequest(pre);// 检查GPS可不可以用
 
+        // Calendar
+        Calendar ca = Calendar.getInstance();
+        mYear = ca.get(Calendar.YEAR);
+        mMonth = ca.get(Calendar.MONTH);
+        mDay = ca.get(Calendar.DAY_OF_MONTH);
+
+
         // for map
         setDialogMap();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
     }
     protected void setImage(String fileName, Uri imageUri){
@@ -169,6 +190,11 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         } else if (item.getType() == Type.DATE) {
             Log.i("type","DATE");
             optionList.add(this.getResources().getString(R.string.alert_item_edit));
+            optionList.add(this.getResources().getString(R.string.alert_item_remove_date));
+        } else if (item.getType() == Type.CAMERA_PROPERTIES){
+            Log.i("type","CAMERA");
+            optionList.add(this.getResources().getString(R.string.alert_item_edit_camera));
+            optionList.add(this.getResources().getString(R.string.alert_item_remove_camera));
         }
         //add a title
         alertDialogBuilder.setTitle(this.getResources().getString(R.string.alert_select_an_action));
@@ -181,7 +207,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                 } else if(which ==1){
                     if(item.getType() == Type.GPS) openDialogMap(item); //打开地图
                     else if(item.getType() == Type.DATE) editDate(item); //修改日期
-                } else if(which ==2 && item.getType()==Type.GPS){ //添加一个remove 日期选择
+                } else if(which ==2){ //添加一个remove 日期选择
                     removeTags(item); //change with positive and negative action !!
                 }
             }
@@ -237,10 +263,44 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
     }
 
     protected void editDate(ExifTagsContainer item){
+        DatePickerDialog datePickerDialog = new DatePickerDialog(Detail.this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        mYear = year;
+                        mMonth = month;
+                        mDay = dayOfMonth;
+                        String dateString = mYear + ":" + (mMonth + 1) + ":" + mDay;
+                        String time = Objects.requireNonNull(pre.exifTagsList.get(1).getList().get(1).component2()).split(" ")[1];
+                        if (time.equals("data")){
+                            time = "";
+                        }
+                        String dateTime = dateString + " " + time;
+                        pre.setEXIFDate(dateTime);
+                        reloadUI();
+                    }
+                },
+                mYear, mMonth, mDay);
+        datePickerDialog.show();
 
     }
     protected void removeTags(ExifTagsContainer item){
+        switch (item.getType()){
+            case DATE:
+                pre.setEXIFDate("No data found");
+                break;
+            case CAMERA_PROPERTIES:
+                pre.setEXIFCamera("No data found", "No data found");
+                break;
+        }
 
+        reloadUI();
+    }
+
+    private void reloadUI(){
+        pre.initialize(getIntent());
+        setImage(pre.file.getName(),pre.imageUri);
+        setExifData(pre.exifTagsList);
     }
 
 
