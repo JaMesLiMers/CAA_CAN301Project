@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import java.io.File
 import java.io.IOException
+import java.lang.Exception
 import java.util.*
 
 
@@ -157,7 +158,7 @@ class PhotoDetailPresenter(){
 //            view.onError(view.getContext().resources.getString(R.string.date_changed_message_error))
 //        }
 //    }
-    fun setEXIFDate(datetime: String){
+    fun setExifDate(datetime: String){
         exifInterface.setAttribute(ExifInterface.TAG_DATETIME, datetime)
         exifInterface.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, datetime)
         exifInterface.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, datetime)
@@ -169,7 +170,16 @@ class PhotoDetailPresenter(){
         computeTags()
     }
 
-    fun setEXIFCamera(make: String, model: String){
+    fun removeExifDate(){
+        val set: MutableSet<String> = HashSet(listOf(
+                ExifInterface.TAG_DATETIME,
+                ExifInterface.TAG_DATETIME_DIGITIZED,
+                ExifInterface.TAG_DATETIME_ORIGINAL
+                ))
+        exifInterface.removeTags(set, {}, {})
+    }
+
+    fun setExifCamera(make: String, model: String){
         exifInterface.setAttribute(ExifInterface.TAG_MAKE, make)
         exifInterface.setAttribute(ExifInterface.TAG_MODEL, model)
         try {
@@ -178,6 +188,14 @@ class PhotoDetailPresenter(){
             Log.e("saveError", "Cannot save EXIF", e)
         }
         computeTags()
+    }
+
+    fun removeExifCamera(){
+        val set: MutableSet<String> = HashSet(listOf(
+                ExifInterface.TAG_MAKE,
+                ExifInterface.TAG_MODEL
+        ))
+        exifInterface.removeTags(set, {}, {})
     }
 
 

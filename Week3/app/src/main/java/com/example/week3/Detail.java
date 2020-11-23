@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.exifinterface.media.ExifInterface;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -271,12 +272,15 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                         mMonth = month;
                         mDay = dayOfMonth;
                         String dateString = mYear + ":" + (mMonth + 1) + ":" + mDay;
-                        String time = Objects.requireNonNull(pre.exifTagsList.get(1).getList().get(1).component2()).split(" ")[1];
-                        if (time.equals("data")){
-                            time = "";
+                        String time = "";
+                        if (!(pre.getExifInterface().getAttribute(ExifInterface.TAG_DATETIME) == null)){
+                            String[] list = pre.getExifInterface().getAttribute(ExifInterface.TAG_DATETIME).split(" ");
+                            if (list.length == 2){
+                                time = list[1];
+                            }
                         }
                         String dateTime = dateString + " " + time;
-                        pre.setEXIFDate(dateTime);
+                        pre.setExifDate(dateTime);
                         reloadUI();
                     }
                 },
@@ -287,11 +291,13 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
     protected void removeTags(ExifTagsContainer item){
         switch (item.getType()){
             case DATE:
-                pre.setEXIFDate("No data found");
+                pre.removeExifDate();
                 break;
             case CAMERA_PROPERTIES:
-                pre.setEXIFCamera("No data found", "No data found");
+                pre.removeExifCamera();
                 break;
+            case GPS:
+                pre.removeExifGPS();
         }
 
         reloadUI();
