@@ -221,6 +221,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                         pre.setLatitude(lat);
                         pre.setLongitude(lon);
                         reloadUI();
+                        refreshMapTarget(mMap);
                     }
                 });
         mapDialogBuilder.setNegativeButton("关闭",
@@ -228,8 +229,10 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //...To-do nothing
+                        refreshMapTarget(mMap);
                     }
                 });
+
         mapDialog = mapDialogBuilder.create();
     }
 
@@ -259,6 +262,20 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
 
     }
+
+    public void refreshMapTarget(GoogleMap googleMap){
+        mMap = googleMap;
+        if (pre.getLatitude() != null && pre.getLongitude() != null) {
+            lat = pre.getLatitude();
+            lon = pre.getLongitude();
+        }
+        LatLng target = new LatLng(lat, lon);
+        mMap.addMarker(new MarkerOptions()
+                .position(target)
+                .title("Marker to select"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
+    }
+
 
     @Override
     public void onMapClick(LatLng point) {

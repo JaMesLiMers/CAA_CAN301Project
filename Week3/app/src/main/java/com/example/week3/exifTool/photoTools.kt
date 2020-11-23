@@ -54,8 +54,8 @@ class PhotoDetailPresenter(){
         exifInterface = ExifInterface(filePath)
         val map = exifInterface.getTags()
         exifTagsList = transformList(map) //拿到list
-        latitude = map[Constant.EXIF_LATITUDE]?.toDouble()
-        longitude = map[Constant.EXIF_LONGITUDE]?.toDouble()
+        latitude = map["EXIF_LATITUDE"]?.toDouble()
+        longitude = map["EXIF_LONGITUDE"]?.toDouble()
     }
 
 //    private fun populateExifProperties() {
