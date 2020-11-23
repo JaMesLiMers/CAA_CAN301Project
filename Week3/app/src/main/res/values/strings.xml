@@ -46,7 +46,8 @@
 
     <string name="something_went_wrong">Something went wrong</string>
     <string name="alert_item_copy_to_clipboard"> copy to clipboard</string>
-    <string name="alert_item_open_map"> open a map</string>
+    <string name="alert_item_open_map"> open a map (google)</string>
+    <string name="alert_item_open_a_map"> open a map (amap)</string>
     <string name="alert_item_remove_gps_tags"> remove the address</string>
     <string name="alert_item_edit"> edit them</string>
     <string name="alert_item_remove_date"> remove date</string>

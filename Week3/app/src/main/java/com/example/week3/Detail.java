@@ -15,6 +15,10 @@ import android.view.View;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.CameraUpdate;
+import com.amap.api.maps2d.MapView;
 import com.bumptech.glide.Glide;
 
 import androidx.appcompat.app.AlertDialog;
@@ -43,7 +47,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
-public class Detail extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
+public class Detail extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, AMap.OnMapClickListener {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView recyclerView;
     private PhotoDetailPresenter pre = new PhotoDetailPresenter();
@@ -56,7 +60,9 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
     private int mDay;
 
     private GoogleMap mMap;
+    private AMap aMap;
     private AlertDialog mapDialog;
+    private AlertDialog aMapDialog;
     private double lon = 0;
     private double lat = 0;
 
@@ -83,6 +89,16 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        // for aMap
+        setDialogAMap(savedInstanceState);
+//        SupportMapFragment aMapFragment = (SupportMapFragment) getSupportFragmentManager()
+//                .findFragmentById(R.id.a_map);
+//        aMapFragment.getMapAsync(this);
+
+
+
+
 
 
     }
@@ -187,6 +203,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         if (item.getType() == Type.GPS) {
             Log.i("type","GPS");
             optionList.add(this.getResources().getString(R.string.alert_item_open_map));
+            optionList.add(this.getResources().getString(R.string.alert_item_open_a_map));
             optionList.add(this.getResources().getString(R.string.alert_item_remove_gps_tags));
         } else if (item.getType() == Type.DATE) {
             Log.i("type","DATE");
@@ -209,6 +226,9 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                     if(item.getType() == Type.GPS) openDialogMap(item); //打开地图
                     else if(item.getType() == Type.DATE) editDate(item); //修改日期
                 } else if(which ==2){ //添加一个remove 日期选择
+                    if(item.getType() == Type.GPS) openDialogAMap(item); //打开地图
+                    else removeTags(item); //change with positive and negative action !!
+                }else if(which ==3){ //添加一个remove 日期选择
                     removeTags(item); //change with positive and negative action !!
                 }
             }
@@ -225,6 +245,61 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
 
     protected void openDialogMap(ExifTagsContainer item){
         mapDialog.show();
+    }
+
+    protected void openDialogAMap(ExifTagsContainer item){
+        aMapDialog.show();
+    }
+
+    protected void setDialogAMap(Bundle savedInstanceState){//ExifTagsContainer item) {
+
+        AlertDialog.Builder mapDialogBuilder = new AlertDialog.Builder(Detail.this);
+        final View dialogView = LayoutInflater.from(Detail.this)
+                .inflate(R.layout.amap_dialog,null);
+        MapView mapView = (MapView) dialogView;
+
+        mapView.onCreate(savedInstanceState);
+
+        // on aMap ready
+        aMap = mapView.getMap();
+
+        aMap.setOnMapClickListener(this);
+
+        refreshMapTarget(aMap);
+
+        mapDialogBuilder.setTitle("MapDialog");
+        mapDialogBuilder.setView(dialogView);
+
+        mapDialogBuilder.setPositiveButton("确定",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Todo：
+                        // "确定" 时：干些什么
+                        // 两样东西存在lat 和 lon里面
+                        // 需要设置和更新
+                        if (aMap != null) {
+                            pre.setExifGPS(lat, lon);
+                            pre.setLatitude(lat);
+                            pre.setLongitude(lon);
+                            reloadUI();
+                            refreshMapTarget(aMap);
+                            if (mMap != null){
+                                refreshMapTarget(mMap);
+                            }
+                        }
+                    }
+                });
+        mapDialogBuilder.setNegativeButton("关闭",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //...To-do nothing
+                        if (aMap != null) refreshMapTarget(aMap);
+                    }
+                });
+
+        aMapDialog = mapDialogBuilder.create();
     }
 
     protected void setDialogMap(){//ExifTagsContainer item) {
@@ -244,11 +319,16 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                         // 两样东西存在lat 和 lon里面
                         // 需要设置和更新
 
-                        pre.setExifGPS(lat, lon);
-                        pre.setLatitude(lat);
-                        pre.setLongitude(lon);
-                        reloadUI();
-                        refreshMapTarget(mMap);
+                        if (mMap != null) {
+                            pre.setExifGPS(lat, lon);
+                            pre.setLatitude(lat);
+                            pre.setLongitude(lon);
+                            reloadUI();
+                            refreshMapTarget(mMap);
+                            if (aMap != null){
+                                refreshMapTarget(aMap);
+                            }
+                        }
                     }
                 });
         mapDialogBuilder.setNegativeButton("关闭",
@@ -256,7 +336,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //...To-do nothing
-                        refreshMapTarget(mMap);
+                        if (mMap != null) refreshMapTarget(mMap);
                     }
                 });
 
@@ -310,16 +390,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
 
         mMap.setOnMapClickListener(this);
 
-        if (pre.getLatitude() != null && pre.getLongitude() != null) {
-            lat = pre.getLatitude();
-            lon = pre.getLongitude();
-        }
-
-        LatLng target = new LatLng(lat, lon);
-        mMap.addMarker(new MarkerOptions()
-                .position(target)
-                .title("Marker to select"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
+        refreshMapTarget(mMap);
 
     }
 
@@ -330,6 +401,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
             lon = pre.getLongitude();
         }
         LatLng target = new LatLng(lat, lon);
+        mMap.clear();
         mMap.addMarker(new MarkerOptions()
                 .position(target)
                 .title("Marker to select"));
@@ -357,5 +429,35 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         pre.initialize(getIntent());
         setImage(pre.file.getName(),pre.imageUri);
         setExifData(pre.exifTagsList);
+    }
+
+    public void refreshMapTarget(AMap a_map){
+        aMap = a_map;
+
+        if (pre.getLatitude() != null && pre.getLongitude() != null) {
+            lat = pre.getLatitude();
+            lon = pre.getLongitude();
+        }
+
+        com.amap.api.maps2d.model.LatLng target = new com.amap.api.maps2d.model.LatLng(lat, lon);
+        aMap.clear();
+        aMap.addMarker(new com.amap.api.maps2d.model.MarkerOptions()
+                .position(target)
+                .title("Marker to select"));
+        aMap.moveCamera(com.amap.api.maps2d.CameraUpdateFactory.newLatLng(target));
+    }
+
+    @Override
+    public void onMapClick(com.amap.api.maps2d.model.LatLng point) {
+        lat = point.latitude;
+        lon = point.longitude;
+
+        // Add a marker in Sydney and move the camera
+        com.amap.api.maps2d.model.LatLng target = new com.amap.api.maps2d.model.LatLng(lat, lon);
+        aMap.clear();
+        aMap.addMarker(new com.amap.api.maps2d.model.MarkerOptions()
+                .position(target)
+                .title("Marker to select"));
+        aMap.moveCamera(com.amap.api.maps2d.CameraUpdateFactory.newLatLng(target));
     }
 }
