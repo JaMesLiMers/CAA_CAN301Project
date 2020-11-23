@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.ImageView;
@@ -27,6 +28,13 @@ import com.example.week3.exifTool.Type;
 import com.example.week3.exifTool.PhotoDetailPresenter;
 import com.example.week3.exifTool.ViewExtensionKt;
 import com.example.week3.interactor.mapInteractor;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,16 +42,23 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
-public class Detail extends AppCompatActivity {
+public class Detail extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView recyclerView;
     private PhotoDetailPresenter pre = new PhotoDetailPresenter();
 
 
+
     //Calendar
-    int mYear;
-    int mMonth;
-    int mDay;
+    private int mYear;
+    private int mMonth;
+    private int mDay;
+
+    private GoogleMap mMap;
+    private AlertDialog mapDialog;
+    private double lon = 0;
+    private double lat = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +69,21 @@ public class Detail extends AppCompatActivity {
         setImage(pre.file.getName(),pre.imageUri);
         setExifData(pre.exifTagsList);
         getAddressByTriggerRequest(pre);// 检查GPS可不可以用
+
         // Calendar
         Calendar ca = Calendar.getInstance();
         mYear = ca.get(Calendar.YEAR);
         mMonth = ca.get(Calendar.MONTH);
         mDay = ca.get(Calendar.DAY_OF_MONTH);
+
+
+        // for map
+        setDialogMap();
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+
     }
     protected void setImage(String fileName, Uri imageUri){
         ((TextView)findViewById(R.id.text_image_info)).setText((CharSequence)(fileName + '\n'));
@@ -196,9 +221,47 @@ public class Detail extends AppCompatActivity {
         clipboard.setPrimaryClip(clip);
         ViewExtensionKt.showSnackbar((CoordinatorLayout)this.findViewById(R.id.coordinator_layout), R.string.text_copied_to_clipboard_message);
     }
-    protected void openDialogMap(ExifTagsContainer item){
 
+    protected void openDialogMap(ExifTagsContainer item){
+        mapDialog.show();
     }
+
+    protected void setDialogMap(){//ExifTagsContainer item) {
+
+        AlertDialog.Builder mapDialogBuilder = new AlertDialog.Builder(Detail.this);
+        final View dialogView = LayoutInflater.from(Detail.this)
+                .inflate(R.layout.map_dialog,null);
+        mapDialogBuilder.setTitle("MapDialog");
+        mapDialogBuilder.setView(dialogView);
+
+        mapDialogBuilder.setPositiveButton("确定",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Todo：
+                        // "确定" 时：干些什么
+                        // 两样东西存在lat 和 lon里面
+                        // 需要设置和更新
+
+                        pre.setExifGPS(lat, lon);
+                        pre.setLatitude(lat);
+                        pre.setLongitude(lon);
+                        reloadUI();
+                        refreshMapTarget(mMap);
+                    }
+                });
+        mapDialogBuilder.setNegativeButton("关闭",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //...To-do nothing
+                        refreshMapTarget(mMap);
+                    }
+                });
+
+        mapDialog = mapDialogBuilder.create();
+    }
+
     protected void editDate(ExifTagsContainer item){
         DatePickerDialog datePickerDialog = new DatePickerDialog(Detail.this,
                 new DatePickerDialog.OnDateSetListener() {
@@ -232,6 +295,62 @@ public class Detail extends AppCompatActivity {
         }
 
         reloadUI();
+    }
+
+    private void reloadUI(){
+        pre.initialize(getIntent());
+        setImage(pre.file.getName(),pre.imageUri);
+        setExifData(pre.exifTagsList);
+    }
+
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        mMap.setOnMapClickListener(this);
+
+        if (pre.getLatitude() != null && pre.getLongitude() != null) {
+            lat = pre.getLatitude();
+            lon = pre.getLongitude();
+        }
+
+        LatLng target = new LatLng(lat, lon);
+        mMap.addMarker(new MarkerOptions()
+                .position(target)
+                .title("Marker to select"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
+
+    }
+
+    public void refreshMapTarget(GoogleMap googleMap){
+        mMap = googleMap;
+        if (pre.getLatitude() != null && pre.getLongitude() != null) {
+            lat = pre.getLatitude();
+            lon = pre.getLongitude();
+        }
+        LatLng target = new LatLng(lat, lon);
+        mMap.addMarker(new MarkerOptions()
+                .position(target)
+                .title("Marker to select"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
+    }
+
+
+    @Override
+    public void onMapClick(LatLng point) {
+
+        lat = point.latitude;
+        lon = point.longitude;
+
+        // Add a marker in Sydney and move the camera
+        LatLng target = new LatLng(lat, lon);
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions()
+                .position(target)
+                .title("Marker to select"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
+
     }
 
     private void reloadUI(){

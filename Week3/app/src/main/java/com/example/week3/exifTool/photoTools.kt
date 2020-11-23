@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.exifinterface.media.ExifInterface
-import com.example.week3.Detail
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -55,8 +54,8 @@ class PhotoDetailPresenter(){
         exifInterface = ExifInterface(filePath)
         val map = exifInterface.getTags()
         exifTagsList = transformList(map) //拿到list
-        latitude = map[Constant.EXIF_LATITUDE]?.toDouble()
-        longitude = map[Constant.EXIF_LONGITUDE]?.toDouble()
+        latitude = map["EXIF_LATITUDE"]?.toDouble()
+        longitude = map["EXIF_LONGITUDE"]?.toDouble()
     }
 
 //    private fun populateExifProperties() {
@@ -182,6 +181,108 @@ class PhotoDetailPresenter(){
     }
 
 
+//    public fun setExifGPS(latitude: Double, longitude: Double){
+//
+//        // Todo：
+//        // "确定" 时：干些什么
+//        // 两样东西存在lat 和 lon里面
+//        // 需要设置和更新
+////        val strLongitude: String = convert(longitude, FORMAT_SECONDS)
+////        val strLatitude: String = convert(latitude, FORMAT_SECONDS)
+//        exifInterface.setAttribute(ExifInterface.TAG_GPS_LATITUDE, latitude.toString())
+//        exifInterface.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, longitude.toString())
+//        try {
+//            exifInterface.saveAttributes()
+//        }catch (e: IOException){
+//            Log.e("pa", "pa", e)
+//        }
+//    }
+    
+    fun removeExifGPS(){
+        val set: MutableSet<String> = HashSet(listOf(
+                ExifInterface.TAG_GPS_ALTITUDE,
+                ExifInterface.TAG_GPS_ALTITUDE_REF,
+                ExifInterface.TAG_GPS_AREA_INFORMATION,
+                ExifInterface.TAG_GPS_DATESTAMP,
+                ExifInterface.TAG_GPS_DEST_BEARING,
+                ExifInterface.TAG_GPS_DEST_BEARING_REF,
+                ExifInterface.TAG_GPS_DEST_DISTANCE,
+                ExifInterface.TAG_GPS_DEST_DISTANCE_REF,
+                ExifInterface.TAG_GPS_DEST_LATITUDE,
+                ExifInterface.TAG_GPS_DEST_LATITUDE_REF,
+                ExifInterface.TAG_GPS_DEST_LONGITUDE,
+                ExifInterface.TAG_GPS_DEST_LONGITUDE_REF,
+                ExifInterface.TAG_GPS_DIFFERENTIAL,
+                ExifInterface.TAG_GPS_DOP,
+                ExifInterface.TAG_GPS_IMG_DIRECTION,
+                ExifInterface.TAG_GPS_IMG_DIRECTION_REF,
+                ExifInterface.TAG_GPS_LATITUDE,
+                ExifInterface.TAG_GPS_LATITUDE_REF,
+                ExifInterface.TAG_GPS_LONGITUDE,
+                ExifInterface.TAG_GPS_LONGITUDE_REF,
+                ExifInterface.TAG_GPS_MAP_DATUM,
+                ExifInterface.TAG_GPS_MEASURE_MODE,
+                ExifInterface.TAG_GPS_PROCESSING_METHOD,
+                ExifInterface.TAG_GPS_SATELLITES,
+                ExifInterface.TAG_GPS_SPEED,
+                ExifInterface.TAG_GPS_SPEED_REF,
+                ExifInterface.TAG_GPS_STATUS,
+                ExifInterface.TAG_GPS_TIMESTAMP,
+                ExifInterface.TAG_GPS_TRACK,
+                ExifInterface.TAG_GPS_TRACK_REF,
+                ExifInterface.TAG_GPS_VERSION_ID))
+        exifInterface.removeTags(set, {}, {})
+    }
+
+    fun setExifGPS(latitude: Double, longitude: Double): Boolean {
+        removeExifGPS()
+        exifInterface.setAttribute(ExifInterface.TAG_GPS_LATITUDE, convert(latitude))
+        exifInterface.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, latitudeRef(latitude))
+        exifInterface.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, convert(longitude))
+        exifInterface.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude))
+        exifInterface.saveAttributes()
+        return true
+    }
+
+    /**
+     * convert latitude into DMS (degree minute second) format. For instance<br></br>
+     * -79.948862 becomes<br></br>
+     * 79/1,56/1,55903/1000<br></br>
+     * It works for latitude and longitude<br></br>
+     * @param latitude could be longitude.
+     * @return
+     */
+    private fun convert(latitude: Double): String {
+        var latitude = latitude
+        latitude = Math.abs(latitude)
+        val degree = latitude.toInt()
+        latitude *= 60.0
+        latitude -= degree * 60.0
+        val minute = latitude.toInt()
+        latitude *= 60.0
+        latitude -= minute * 60.0
+        val second = (latitude * 1000.0).toInt()
+        val sb = java.lang.StringBuilder(20)
+        sb.append(degree)
+        sb.append("/1,")
+        sb.append(minute)
+        sb.append("/1,")
+        sb.append(second)
+        sb.append("/1000")
+        return sb.toString()
+    }
+
+    private fun createDebugStringBuilder(filePath: File): java.lang.StringBuilder? {
+        return java.lang.StringBuilder("Set Exif to file='").append(filePath.absolutePath).append("'\n\t")
+    }
+
+    private fun latitudeRef(latitude: Double): String? {
+        return if (latitude < 0.0) "S" else "N"
+    }
+
+    private fun longitudeRef(longitude: Double): String? {
+        return if (longitude < 0.0) "W" else "E"
+    }
 
 
 }

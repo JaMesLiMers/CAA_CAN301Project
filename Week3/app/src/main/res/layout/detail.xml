@@ -9,6 +9,8 @@
     android:fitsSystemWindows="true"
     tools:context="com.example.week3.Detail">
 
+
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
