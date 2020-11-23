@@ -284,6 +284,9 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                             pre.setLongitude(lon);
                             reloadUI();
                             refreshMapTarget(aMap);
+                            if (mMap != null){
+                                refreshMapTarget(mMap);
+                            }
                         }
                     }
                 });
@@ -322,6 +325,9 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                             pre.setLongitude(lon);
                             reloadUI();
                             refreshMapTarget(mMap);
+                            if (aMap != null){
+                                refreshMapTarget(aMap);
+                            }
                         }
                     }
                 });
@@ -395,6 +401,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
             lon = pre.getLongitude();
         }
         LatLng target = new LatLng(lat, lon);
+        mMap.clear();
         mMap.addMarker(new MarkerOptions()
                 .position(target)
                 .title("Marker to select"));
@@ -433,6 +440,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         }
 
         com.amap.api.maps2d.model.LatLng target = new com.amap.api.maps2d.model.LatLng(lat, lon);
+        aMap.clear();
         aMap.addMarker(new com.amap.api.maps2d.model.MarkerOptions()
                 .position(target)
                 .title("Marker to select"));
