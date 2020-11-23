@@ -297,12 +297,6 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         reloadUI();
     }
 
-    private void reloadUI(){
-        pre.initialize(getIntent());
-        setImage(pre.file.getName(),pre.imageUri);
-        setExifData(pre.exifTagsList);
-    }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
