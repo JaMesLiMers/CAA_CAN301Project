@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 public class Detail extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
@@ -165,6 +166,10 @@ public class Detail extends AppCompatActivity {
             Log.i("type","DATE");
             optionList.add(this.getResources().getString(R.string.alert_item_edit));
             optionList.add(this.getResources().getString(R.string.alert_item_remove_date));
+        } else if (item.getType() == Type.CAMERA_PROPERTIES){
+            Log.i("type","CAMERA");
+            optionList.add(this.getResources().getString(R.string.alert_item_edit_camera));
+            optionList.add(this.getResources().getString(R.string.alert_item_remove_camera));
         }
         //add a title
         alertDialogBuilder.setTitle(this.getResources().getString(R.string.alert_select_an_action));
@@ -203,7 +208,10 @@ public class Detail extends AppCompatActivity {
                         mMonth = month;
                         mDay = dayOfMonth;
                         String dateString = mYear + ":" + (mMonth + 1) + ":" + mDay;
-                        String time = pre.exifTagsList.get(1).getList().get(1).component2().split(" ")[1];
+                        String time = Objects.requireNonNull(pre.exifTagsList.get(1).getList().get(1).component2()).split(" ")[1];
+                        if (time.equals("data")){
+                            time = "";
+                        }
                         String dateTime = dateString + " " + time;
                         pre.setEXIFDate(dateTime);
                         reloadUI();
@@ -214,9 +222,13 @@ public class Detail extends AppCompatActivity {
 
     }
     protected void removeTags(ExifTagsContainer item){
-//        String type = (String)item.getType().name();
-        if (item.getType() == Type.DATE){
-            pre.setEXIFDate("No data found");
+        switch (item.getType()){
+            case DATE:
+                pre.setEXIFDate("No data found");
+                break;
+            case CAMERA_PROPERTIES:
+                pre.setEXIFCamera("No data found", "No data found");
+                break;
         }
 
         reloadUI();

@@ -161,11 +161,27 @@ class PhotoDetailPresenter(){
     fun setEXIFDate(datetime: String){
         exifInterface.setAttribute(ExifInterface.TAG_DATETIME, datetime)
         exifInterface.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, datetime)
-    try {
-        exifInterface.saveAttributes() //最后保存起来
-    } catch (e: IOException) {
-        Log.e("saveError", "Cannot save EXIF", e)
+        exifInterface.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, datetime)
+        try {
+            exifInterface.saveAttributes() //最后保存起来
+        } catch (e: IOException) {
+            Log.e("saveError", "Cannot save EXIF", e)
+        }
+        computeTags()
     }
+
+    fun setEXIFCamera(make: String, model: String){
+        exifInterface.setAttribute(ExifInterface.TAG_MAKE, make)
+        exifInterface.setAttribute(ExifInterface.TAG_MODEL, model)
+        try {
+            exifInterface.saveAttributes() //最后保存起来
+        } catch (e: IOException) {
+            Log.e("saveError", "Cannot save EXIF", e)
+        }
+        computeTags()
     }
+
+
+
 
 }
