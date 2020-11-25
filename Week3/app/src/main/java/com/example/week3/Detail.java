@@ -221,9 +221,6 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
             Log.i("type","CAMERA");
             optionList.add(this.getResources().getString(R.string.alert_item_edit_camera));
             optionList.add(this.getResources().getString(R.string.alert_item_remove_camera));
-        } else if (item.getType() == Type.OTHER){
-            Log.i("type", "Other");
-            optionList.add(this.getResources().getString(R.string.alert_item_remove_others));
         }
         //add a title
         alertDialogBuilder.setTitle(this.getResources().getString(R.string.alert_select_an_action));
