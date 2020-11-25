@@ -187,7 +187,7 @@ class PhotoDetailPresenter(){
         } catch (e: IOException) {
             Log.e("saveError", "Cannot save EXIF", e)
         }
-        computeTags()
+//        computeTags()
     }
 
     fun removeExifCamera(){

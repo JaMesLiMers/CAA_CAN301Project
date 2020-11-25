@@ -2,6 +2,7 @@ package com.example.week3;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -13,14 +14,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.exifinterface.media.ExifInterface;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -57,10 +62,12 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
     private int mMonth;
     private int mDay;
 
+    //Map
     private GoogleMap mMap;
     private AlertDialog mapDialog;
     private double lon = 0;
     private double lat = 0;
+
 
 
     @Override
@@ -85,7 +92,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        Toast.makeText(this,"sblym",Toast.LENGTH_LONG).show();
 
     }
     protected void setImage(String fileName, Uri imageUri){
@@ -182,7 +189,7 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
     protected void showAlertDialogWhenItemIsPressed(final ExifTagsContainer item){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         ArrayList<String> optionList = new ArrayList<>();
-        TextView text = new TextView(this);
+//        TextView text = new TextView(this);
 
 
         optionList.add(this.getResources().getString(R.string.alert_item_copy_to_clipboard));
@@ -198,6 +205,9 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
             Log.i("type","CAMERA");
             optionList.add(this.getResources().getString(R.string.alert_item_edit_camera));
             optionList.add(this.getResources().getString(R.string.alert_item_remove_camera));
+        } else if (item.getType() == Type.OTHER){
+            Log.i("type", "Other");
+            optionList.add(this.getResources().getString(R.string.alert_item_remove_others));
         }
         //add a title
         alertDialogBuilder.setTitle(this.getResources().getString(R.string.alert_select_an_action));
@@ -297,8 +307,44 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
     }
 
     protected void editCamera(ExifTagsContainer item){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // Get the layout inflater
+        final LayoutInflater inflater = this.getLayoutInflater();
+
+        // Inflate and set the layout for the dialog
+        // Pass null as the parent view because its going in the dialog layout
+        final View view  = inflater.inflate(R.layout.dialog_edit_camera, null);
+        builder.setView(view)
+                // Add action buttons
+                .setPositiveButton(R.string.dialog_edit_camera_properties_confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        String camera_make = ((EditText)view.findViewById(R.id.editText_camera_make)).getText().toString();
+                        String camera_model = ((EditText)view.findViewById(R.id.editText_camera_model)).getText().toString();
+                        pre.setExifCamera(camera_make,camera_model);
+                        reloadUI();
+                    }
+                })
+                .setNegativeButton(R.string.dialog_edit_camera_properties_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog dialog_edit_camera = builder.create();
+        dialog_edit_camera.show();
+
+
 
     }
+
+//    private class EditCameraDialogFragment extends DialogFragment {
+//        @Override
+//        public Dialog onCreateDialog(Bundle savedInstanceState) {
+//
+//            return builder.create();
+//        }
+//    }
+
     protected void removeTags(ExifTagsContainer item){
         switch (item.getType()){
             case DATE:
