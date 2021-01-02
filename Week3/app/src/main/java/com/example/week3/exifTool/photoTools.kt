@@ -51,6 +51,15 @@ class PhotoDetailPresenter(){
         //getAddressByTriggerRequest()
     }
 
+    fun initialize(str: String) {
+        this.filePath = str
+        this.computeTags() // 得到tag
+
+        this.setImageByGivenAPath() // 得到 file imageuri 还有 filepath等
+        //populateExifProperties() //直接return
+        //getAddressByTriggerRequest()
+    }
+
     private fun computeTags() {
         exifInterface = ExifInterface(filePath)
         val map = exifInterface.getTags()

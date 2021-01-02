@@ -59,8 +59,6 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
     private RecyclerView recyclerView;
     private PhotoDetailPresenter pre = new PhotoDetailPresenter();
 
-
-
     //Calendar
     private int mYear;
     private int mMonth;

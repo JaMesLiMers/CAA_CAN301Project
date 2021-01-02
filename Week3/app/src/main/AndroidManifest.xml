@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <!--允许程序获取网络状态-->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!--允许程序访问WiFi网络信息-->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -40,6 +41,14 @@
                 <!-- This activity will appear as an icon in the app launcher -->
             </intent-filter>
         </activity>
+        <activity android:name=".CustomPhotoGalleryActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <!-- This activity is the entry point for this app -->
+                <category android:name="android.intent.category.LAUNCHER" />
+                <!-- This activity will appear as an icon in the app launcher -->
+            </intent-filter>
+        </activity>
         <activity android:name=".Detail">
         </activity>
         <provider
@@ -53,5 +62,6 @@
         </provider>
 
     </application>
+
 
 </manifest>

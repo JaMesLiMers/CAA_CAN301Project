@@ -38,6 +38,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import android.provider.MediaStore;
@@ -52,9 +53,7 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_PHOTO = 2;
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_CHOOSE_PHOTO = 3;
-    private static final int PERMISSION_REQUEST_TAKE_PHONE = 6;
-    private static final int PERMISSION_REQUEST_CHOOSE_PICTURE = 7;
-    private static final int PICK_IMAGE_REQUEST = 66;
+    private static final int REQUEST_SEARCH_PHOTO = 4;
     private View mLayout;
     private File output;  // 设置拍照的图片文件
     private Uri photoUri;  // 拍摄照片的路径
@@ -94,6 +93,13 @@ public class MainActivity extends AppCompatActivity
                 showPhotoPreview();
             }
         });
+        findViewById(R.id.open_search).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showSearchPreview();
+            }
+        });
+        //add a button
 
     }
 
@@ -274,9 +280,27 @@ public class MainActivity extends AppCompatActivity
                 == PackageManager.PERMISSION_GRANTED) {
             // Permission is already available, start camera preview
             Snackbar.make(mLayout,
-                    R.string.camera_permission_available,
+                    R.string.photo_permission_available,
                     Snackbar.LENGTH_SHORT).show();
             launchPhoto();
+        } else {
+            // Permission is missing and must be requested.
+            RequestPhotoPreview();
+        }
+        // END_INCLUDE(startCamera)
+    }
+
+    private void showSearchPreview() {
+        // BEGIN_INCLUDE(startCamera)
+        // Check if the Camera permission has been granted
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Permission is already available, start camera preview
+            Snackbar.make(mLayout,
+                    R.string.photo_permission_available,
+                    Snackbar.LENGTH_SHORT).show();
+            //change func
+            launchSearch();
         } else {
             // Permission is missing and must be requested.
             RequestPhotoPreview();
@@ -311,6 +335,11 @@ public class MainActivity extends AppCompatActivity
         intent.setType("image/*");
         startActivityForResult(intent, REQUEST_CHOOSE_PHOTO);
     }
+
+    private void launchSearch() {
+        Intent intent = new Intent(this, CustomPhotoGalleryActivity.class);
+        startActivityForResult(intent, REQUEST_SEARCH_PHOTO);
+    }
     protected void openPhoto(String path){
 
         Intent intent = new Intent(this,Detail.class);
@@ -340,8 +369,7 @@ public class MainActivity extends AppCompatActivity
             case REQUEST_CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
                     Uri uri = data.getData();
-                    //uri.getPath();
-                    //Log.i("path",uri.getPath().toString());
+
                     String filePath="";
                     ContentResolver cr = this.getContentResolver();
                     String[] proj = new String[]{"_data"};
@@ -363,9 +391,30 @@ public class MainActivity extends AppCompatActivity
 //                        Toast.makeText(this, "程序崩溃", Toast.LENGTH_SHORT).show();
 //                    }
                 } else {
-                    Log.i("REQUEST_TAKE_PHOTO", "拍摄失败");
+                    Log.i("REQUEST_CHOOSE_PHOTO", "读取失败");
                 }
                 break;
+            case REQUEST_SEARCH_PHOTO:
+                // 请求搜索部分
+                if (resultCode == RESULT_OK) {
+                    ArrayList<String> imagesPathList = new ArrayList<String>();
+                    String[] imagesPath = data.getStringExtra("data").split("\\|");
+
+                    for (int i=0;i<imagesPath.length;i++){
+                        // 加入所有选定的path
+                        imagesPathList.add(imagesPath[i]);
+                    }
+
+                    // 如果只有一个，就编辑
+                    if (imagesPathList.size() == 1) openPhoto(imagesPathList.get(0));
+                    else openPhoto(imagesPathList.get(0));
+
+
+                }else {
+                    Log.i("REQUEST_SEARCH_PHOTO", "搜索失败");
+                }
+                break;
+
         }
     }
 
