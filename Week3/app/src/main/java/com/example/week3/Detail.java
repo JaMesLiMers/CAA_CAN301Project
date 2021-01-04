@@ -40,7 +40,7 @@ import com.example.week3.exifTool.*;
 import com.example.week3.exifTool.Type;
 import com.example.week3.exifTool.PhotoDetailPresenter;
 import com.example.week3.exifTool.ViewExtensionKt;
-import com.example.week3.interactor.mapInteractor;
+//import com.example.week3.interactor.mapInteractor;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;

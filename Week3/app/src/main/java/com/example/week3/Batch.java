@@ -12,9 +12,12 @@ import android.location.Geocoder;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -34,7 +37,7 @@ import androidx.exifinterface.media.ExifInterface;
 
 import com.amap.api.maps2d.AMap;
 import com.bumptech.glide.Glide;
-import com.example.week3.Detail;
+
 
 import com.example.week3.exifTool.ExifTagsContainer;
 import com.example.week3.exifTool.PhotoDetailPresenter;
@@ -54,6 +57,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import gdut.bsx.share2.Share2;
+import gdut.bsx.share2.ShareContentType;
 
 public class Batch extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private static final String TAG = "CustomPhotoGalleryActivity";
@@ -86,6 +92,10 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        builder.detectFileUriExposure();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.batch);
         Intent intent = this.getIntent();
@@ -204,6 +214,48 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         });
 
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.tool_bar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.toolbar_share) {
+            ArrayList<Uri> uris = new ArrayList<Uri>();
+            for(PhotoDetailPresenter pre: photoList){
+                uris.add(pre.imageUri);
+            }
+            boolean multiple = uris.size() > 1;
+            Intent intent = new Intent(multiple ? android.content.Intent.ACTION_SEND_MULTIPLE
+                    : android.content.Intent.ACTION_SEND);
+
+            if (multiple) {
+                intent.setType("image/*");
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+            } else {
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_STREAM, uris.get(0));
+            }
+            startActivity(Intent.createChooser(intent, "Share"));
+
+            return true;
+        }else if(item.getItemId() == R.id.toolbar_delete){
+
+            for(PhotoDetailPresenter pre:photoList) {
+                pre.removeAllTags();
+            }
+
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
     protected void openDialogMap(){
         mapDialog.show();
     }
@@ -369,6 +421,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                 }
         }
     }
+
 
     @Override
     public void onBackPressed() {
