@@ -147,7 +147,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         ((ImageView) findViewById(R.id.image_photo_camera)).setImageResource(R.drawable.ic_photo_camera_black_24dp);
         ((ImageView) findViewById(R.id.image_photo_date)).setImageResource(R.drawable.ic_date_range_black_24dp);
 
-
+        Context context = this;
         //gps
         gps_del = findViewById(R.id.gps_delete);
         gps_edit = findViewById(R.id.gps_edit);
@@ -164,8 +164,18 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         gps_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               removeTags(pre.exifTagsList.get(0));
-
+                AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the GPS information?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                removeTags(pre.exifTagsList.get(0));
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
             }
         });
         //camera
@@ -181,7 +191,18 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         camera_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                removeTags(pre.exifTagsList.get(2));
+                AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the camera properties?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                removeTags(pre.exifTagsList.get(2));
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
 
             }
         });
@@ -195,10 +216,22 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
 
             }
         });
+
         date_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                removeTags(pre.exifTagsList.get(1));
+                AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the date information?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                removeTags(pre.exifTagsList.get(1));
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
 
             }
         });
@@ -207,9 +240,21 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         all_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for(PhotoDetailPresenter pre: photoList){
-                    pre.removeAllTags();
-                }
+                AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the information? This operation could not be reverted.")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                for(PhotoDetailPresenter pre: photoList){
+                                    pre.removeAllTags();
+                                }
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
+
             }
         });
 
@@ -246,9 +291,20 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
             return true;
         }else if(item.getItemId() == R.id.toolbar_delete){
 
-            for(PhotoDetailPresenter pre:photoList) {
-                pre.removeAllTags();
-            }
+            AlertDialog.Builder adb = new AlertDialog.Builder(this);
+            adb.setTitle("Are you sure to delete all the information? This operation could not be reverted.")
+                    .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            for(PhotoDetailPresenter pre: photoList){
+                                pre.removeAllTags();
+                            }
+                        }
+                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            }).show();
 
             return true;
         }
