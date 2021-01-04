@@ -41,6 +41,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
+
 import android.provider.MediaStore;
 import android.content.ContentResolver;
 import android.database.Cursor;
@@ -58,6 +60,8 @@ public class MainActivity extends AppCompatActivity
     private File output;  // 设置拍照的图片文件
     private Uri photoUri;  // 拍摄照片的路径
     private ImageView picture;
+    private Uri takephoto;
+    private String currentPhotoPath;
     /**
      * 用于保存拍照图片的uri
      */
@@ -99,6 +103,7 @@ public class MainActivity extends AppCompatActivity
                 showSearchPreview();
             }
         });
+
         //add a button
 
     }
@@ -210,40 +215,59 @@ public class MainActivity extends AppCompatActivity
 //        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
 //        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
 //        startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+
+        final String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/pic/";
+        File newdir = new File(dir);
+        newdir.mkdirs();
+
         Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // 判断是否有相机
-        if (captureIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = null;
-            Uri photoUri = null;
-
-            if (isAndroidQ) {
-                // 适配android 10
-                photoUri = createImageUri();
-            } else {
-                try {
-                    photoFile = createImageFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if (photoFile != null) {
-                    mCameraImagePath = photoFile.getAbsolutePath();
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        //适配Android 7.0文件权限，通过FileProvider创建一个content类型的Uri //
-                        photoUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", photoFile);
-                    } else {
-                        photoUri = Uri.fromFile(photoFile);
-                    }
-                }
-            }
-
-            mCameraUri = photoUri;
-            if (photoUri != null) {
-                captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                startActivityForResult(captureIntent, REQUEST_TAKE_PHOTO);
-            }
-        }
+//        if (captureIntent.resolveActivity(getPackageManager()) != null) {
+//            File photoFile = null;
+//            Uri photoUri = null;
+//
+//            if (isAndroidQ) {
+//                // 适配android 10
+//                photoUri = createImageUri();
+//            } else {
+//                try {
+//                    photoFile = createImageFile();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                if (photoFile != null) {
+//                    Uri photoURI = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
+//                            BuildConfig.APPLICATION_ID + ".provider", photoFile);
+////                    Uri photoURI = FileProvider.getUriForFile(this,
+////                            "com.example.android.fileprovider",
+////                            photoFile);
+//                    takephoto = photoURI;
+//                    captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+//                    startActivityForResult(captureIntent, REQUEST_TAKE_PHOTO);
+//                }
+////                if (photoFile != null) {
+////
+////                    mCameraImagePath = photoFile.getAbsolutePath();
+////                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+////                        //适配Android 7.0文件权限，通过FileProvider创建一个content类型的Uri //
+////                        photoUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", photoFile);
+////                    } else {
+////                        photoUri = Uri.fromFile(photoFile);
+////                    }
+////                }
+//            }
+//
+////            mCameraUri = photoUri;
+////            if (photoUri != null) {
+////                captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+////                Log.i("aaaaaaa", "startCamera: "+photoUri);
+////                captureIntent.putExtra("return-data", true);
+////                takephoto = photoUri;
+////               // captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+////                startActivityForResult(captureIntent, REQUEST_TAKE_PHOTO);
+////            }
+//        }
+        //String file = dir+crea
     }
     private Uri createImageUri() {
         String status = Environment.getExternalStorageState();
@@ -261,17 +285,31 @@ public class MainActivity extends AppCompatActivity
      * @throws IOException
      */
     private File createImageFile() throws IOException {
-        String imageName = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        if (!storageDir.exists()) {
-            storageDir.mkdir();
-        }
-        File tempFile = new File(storageDir, imageName);
-        if (!Environment.MEDIA_MOUNTED.equals(EnvironmentCompat.getStorageState(tempFile))) {
-            return null;
-        }
-        return tempFile;
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
+//    private File createImageFile() throws IOException {
+//        String imageName = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+//        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+//        if (!storageDir.exists()) {
+//            storageDir.mkdir();
+//        }
+//        File tempFile = new File(storageDir, imageName);
+//        if (!Environment.MEDIA_MOUNTED.equals(EnvironmentCompat.getStorageState(tempFile))) {
+//            return null;
+//        }
+//        return tempFile;
+//    }
 
     private void showPhotoPreview() {
         // BEGIN_INCLUDE(startCamera)
@@ -331,9 +369,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void launchPhoto() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
+        Intent intent = new Intent(this, PhotoGallery.class);
         startActivityForResult(intent, REQUEST_CHOOSE_PHOTO);
+//        Intent intent = new Intent(Intent.ACTION_PICK);
+//        intent.setType("image/*");String
+//        startActivityForResult(intent, REQUEST_CHOOSE_PHOTO);
     }
 
     private void launchSearch() {
@@ -346,14 +386,19 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra("path_file", path);
         startActivity(intent);
     }
+    protected void openPhotoList(String[] pathList){
+        Intent intent = new Intent(this,Batch.class);
+        intent.putExtra("path_list", pathList);
+        startActivity(intent);
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    Uri uri = data.getData();//data = null？？
-                    openPhoto(uri.getPath());
+                    //data = null result code = -1??
+                    openPhoto(takephoto.getPath());
 //                    try {//launch?
 //                        Bitmap bit = BitmapFactory.decodeStream(getContentResolver().openInputStream(photoUri));//拍完照到这一页
 //                        picture.setImageBitmap(bit);
@@ -368,28 +413,19 @@ public class MainActivity extends AppCompatActivity
                 break;
             case REQUEST_CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    Uri uri = data.getData();
+                    if (resultCode == RESULT_OK) {
+                        ArrayList<String> imagesPathList = new ArrayList<String>();
+                        String[] imagesPath = data.getStringExtra("data").split("\\|");
 
-                    String filePath="";
-                    ContentResolver cr = this.getContentResolver();
-                    String[] proj = new String[]{"_data"};
-                    Cursor cursor = cr.query(uri,proj, (String)null, (String[])null, (String)null);
-                    if (cursor.moveToFirst()) {
-                        int column_index = cursor.getColumnIndexOrThrow("_data");
-                        filePath = cursor.getString(column_index);
+                        for (int i = 0; i < imagesPath.length; i++) {
+                            // 加入所有选定的path
+                            imagesPathList.add(imagesPath[i]);
+                        }
+
+                        if (imagesPathList.size() == 1) openPhoto(imagesPathList.get(0));
+                        else openPhotoList(imagesPathList.stream().toArray(String[]::new));
                     }
-                    cursor.close();
-                    openPhoto(filePath);
-//                    try {
-//                        //封装好一个方法用来打开另一个activity的
-//
-//                        //Bitmap bit = BitmapFactory.decodeStream(getContentResolver().openInputStream(uri));
-//                       // picture.setImageBitmap(bit);
-//                    } catch (FileNotFoundException e) {
-//                        e.printStackTrace();
-//                        Log.d("tag", e.getMessage());
-//                        Toast.makeText(this, "程序崩溃", Toast.LENGTH_SHORT).show();
-//                    }
+
                 } else {
                     Log.i("REQUEST_CHOOSE_PHOTO", "读取失败");
                 }

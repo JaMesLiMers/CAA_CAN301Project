@@ -22,6 +22,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provide_paths"></meta-data>
+        </provider>
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
         <meta-data
             android:name="com.amap.api.v2.apikey"
@@ -42,14 +51,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".CustomPhotoGalleryActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <!-- This activity is the entry point for this app -->
-                <category android:name="android.intent.category.LAUNCHER" />
-                <!-- This activity will appear as an icon in the app launcher -->
-            </intent-filter>
         </activity>
         <activity android:name=".Detail">
+        </activity>
+        <activity android:name=".PhotoGallery">
+        </activity>
+        <activity android:name=".Batch">
         </activity>
         <provider
             android:name="androidx.core.content.FileProvider"

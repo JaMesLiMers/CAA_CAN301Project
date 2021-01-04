@@ -98,9 +98,6 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
 
         // for aMap
         setDialogAMap(savedInstanceState);
-//        SupportMapFragment aMapFragment = (SupportMapFragment) getSupportFragmentManager()
-//                .findFragmentById(R.id.a_map);
-//        aMapFragment.getMapAsync(this);
 
 
 

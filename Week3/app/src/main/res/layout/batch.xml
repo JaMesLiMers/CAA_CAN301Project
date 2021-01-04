@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:gravity="center"
+android:orientation="vertical" >
+
+
+        <GridView
+            android:id="@+id/bacthImage"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:numColumns="auto_fit"
+            android:verticalSpacing="10dp"
+            android:horizontalSpacing="10dp"
+            android:columnWidth="200dp"
+            android:stretchMode="columnWidth"
+            android:gravity="center"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <ImageView
+                    android:id="@+id/image_photo_gps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.2"/>
+
+                <Button
+                    android:id="@+id/gps_delete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="delete"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="25sp" />
+                <Button
+                    android:id="@+id/gps_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="edit"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="25sp" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <ImageView
+                    android:id="@+id/image_photo_camera"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.2"/>
+                <Button
+                    android:id="@+id/camera_delete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="25sp"
+                    android:text="delete"/>
+
+                <Button
+                    android:id="@+id/camera_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="edit"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="25sp" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <ImageView
+                    android:id="@+id/image_photo_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.2"/>
+                <Button
+                    android:id="@+id/date_delete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="25sp"
+                    android:text="delete"/>
+                <Button
+                    android:id="@+id/date_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="25sp"
+                    android:text="edit"/>
+            </LinearLayout>
+            <Button
+                android:id="@+id/deleteAll"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textColor="@color/colorPrimary"
+                android:textSize="25sp"
+                android:text="Del All"/>
+
+        </LinearLayout>
+
+
+</LinearLayout>

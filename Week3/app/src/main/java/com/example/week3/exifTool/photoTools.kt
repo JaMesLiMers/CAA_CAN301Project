@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.exifinterface.media.ExifInterface
+import com.example.week3.R
 import java.io.File
 import java.io.IOException
 import java.lang.Exception
@@ -224,7 +225,12 @@ class PhotoDetailPresenter(){
 //            Log.e("pa", "pa", e)
 //        }
 //    }
-    
+fun removeAllTags() {
+    exifInterface.removeAllTags(
+            onSuccess = {
+            },
+            onFailure = {})
+}
     fun removeExifGPS(){
         val set: MutableSet<String> = HashSet(listOf(
                 ExifInterface.TAG_GPS_ALTITUDE,

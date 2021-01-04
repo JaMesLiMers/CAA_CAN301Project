@@ -13,8 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="camera"
-        app:layout_constraintBottom_toTopOf="@+id/open_search"
-        />
+        app:layout_constraintBottom_toTopOf="@+id/open_search" />
 
     <Button
         android:id="@+id/open_search"
@@ -25,10 +24,17 @@
 
     <Button
         android:id="@+id/open_photo"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="getPhoto"
+        />
+    <Button
+        android:id="@+id/url"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="URL get photo"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

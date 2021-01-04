@@ -1,5 +1,6 @@
 package com.example.week3;
 
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -30,8 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class CustomPhotoGalleryActivity extends Activity {
-    private static final String TAG = "CustomPhotoGalleryActivity";
+public class PhotoGallery extends Activity {
+    private static final String TAG = "PhotoGallery";
     private GridView grdImages;
     private Button btnSelect;
     private Button btnSearch;
@@ -52,15 +53,11 @@ public class CustomPhotoGalleryActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_custom_photo_gallery);
+        setContentView(R.layout.photos);
         // 所有图片
         grdImages= (GridView) findViewById(R.id.grdImages);
         // 确定按钮
         btnSelect= (Button) findViewById(R.id.btnSelect);
-        // 搜索按钮
-        btnSearch= (Button) findViewById(R.id.btnSearch);
-        // 搜索文字
-        strSearch =(EditText)findViewById(R.id.strSearch);
 
         final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID }; //{"_data, _id"}
         final String orderBy = MediaStore.Images.Media._ID; // "_id"
@@ -88,48 +85,8 @@ public class CustomPhotoGalleryActivity extends Activity {
 
 
         }
-        // 获取所有的lat lon信息
-        getAllLatLon();
-
-        // 获取所有的City信息
-        getAllCity();
-
-        // 设定图片预览 （下面的class负责）
-        // imageAdapter = new ImageAdapter(this.all_count, this.all_ids);
-        // grdImages.setAdapter((ListAdapter) imageAdapter);
-
-        // 查询完毕关闭cursor
-        imagecursor.close();
-
-        // 搜索回调函数
-        btnSearch.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                // 清空结果
-                grdImages.setAdapter(null);
-
-                // 获取文字
-                String strSearch_="";
-                strSearch_=strSearch.getText().toString().toLowerCase();
-
-                int count = 0;
-                ArrayList ids_ = new ArrayList<Integer>();
-
-                // 按照搜索过滤所有的图片
-                for (int i = 0; i < all_count; i++) {
-                    if (all_city[i].toLowerCase().equals(strSearch_)){
-                        count += 1;
-                        ids_.add(all_ids[i]);
-                    }
-                }
-                // int[]
-                int[] ids = ids_.stream().mapToInt(i -> (int) i).toArray();
-
-                // 设定图片预览 （下面的class负责）
-                imageAdapter = new ImageAdapter(count, ids);
-                grdImages.setAdapter((ListAdapter) imageAdapter);
-            }
-        });
+        imageAdapter = new ImageAdapter(all_ids.length, all_ids);
+        grdImages.setAdapter((ListAdapter) imageAdapter);
 
         // 确认选择回调函数
         btnSelect.setOnClickListener(new View.OnClickListener() {
@@ -159,81 +116,6 @@ public class CustomPhotoGalleryActivity extends Activity {
 
     }
 
-    public boolean getAllLatLon(){
-        try{
-            for (int i = 0; i < this.all_count; i++) {
-                PhotoDetailPresenter pre =  new PhotoDetailPresenter();
-                pre.initialize(all_arrPath[i]);
-
-                // get lat lon
-                double lat = 104.1954;
-                double lon = 35.8617;
-                try {
-                    lat = pre.getLatitude();
-                    lon = pre.getLongitude();
-                }catch (NullPointerException e){
-
-                }finally {
-                    all_lat_long[i][0] = lat;
-                    all_lat_long[i][1] = lon;
-                }
-
-            }
-            return true;
-        }catch (Exception e) {
-            return false;
-        }
-    }
-
-    public boolean getAllCity(){
-        try{
-            for (int i = 0; i < this.all_count; i++) {
-                // get图片id
-                double lat = all_lat_long[i][0];
-                double lon = all_lat_long[i][1];
-
-                // 这里可能要异步运行
-                this.all_city[i] = getAddress(lat, lon);
-            }
-            return true;
-        }catch (Exception e) {
-            return false;
-        }
-
-    }
-
-    public String getAddress(double latitude, double longitude) {
-        String cityName = "";
-        List<Address> addresses;
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-
-        try {
-            addresses = geocoder.getFromLocation(latitude,longitude,1);
-            if (geocoder.isPresent()) {
-                StringBuilder stringBuilder = new StringBuilder();
-                if (addresses.size()>0) {
-                    Address returnAddress = addresses.get(0);
-
-                    cityName = returnAddress.getLocality();
-                    String name = returnAddress.getFeatureName();
-                    String subLocality = returnAddress.getSubLocality();
-                    String country = returnAddress.getCountryName();
-                    String region_code = returnAddress.getCountryCode();
-                    String zipcode = returnAddress.getPostalCode();
-                    String state = returnAddress.getAdminArea();
-
-                }
-            } else {
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // remove "市"
-        cityName = cityName.split(" ")[0];
-
-        return cityName;
-    }
 
 
     @Override
@@ -308,6 +190,7 @@ public class CustomPhotoGalleryActivity extends Activity {
                 convertView = mInflater.inflate(R.layout.custom_gallery_item, null);
                 holder.imgThumb = (ImageView) convertView.findViewById(R.id.imgThumb);
                 holder.chkImage = (CheckBox) convertView.findViewById(R.id.chkImage);
+
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
