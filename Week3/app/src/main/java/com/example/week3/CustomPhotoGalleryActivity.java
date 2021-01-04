@@ -228,11 +228,12 @@ public class CustomPhotoGalleryActivity extends Activity {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        // remove "市"
-        cityName = cityName.split(" ")[0];
+        }finally {
+            // remove "市"
+            cityName = cityName.split(" ")[0];
 
-        return cityName;
+            return cityName;
+        }
     }
 
 
