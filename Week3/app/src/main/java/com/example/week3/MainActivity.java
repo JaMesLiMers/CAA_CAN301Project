@@ -1,51 +1,35 @@
 package com.example.week3;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.Manifest;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.app.Activity;
-import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
-import androidx.core.os.EnvironmentCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
-
-import android.provider.MediaStore;
-import android.content.ContentResolver;
-import android.database.Cursor;
 
 public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback{
@@ -62,6 +46,10 @@ public class MainActivity extends AppCompatActivity
     private ImageView picture;
     private Uri takephoto;
     private String currentPhotoPath;
+    private long downloadID;
+    DownloadManager downloadManager;
+    private Uri uri = null;
+
     /**
      * 用于保存拍照图片的uri
      */
@@ -76,6 +64,7 @@ public class MainActivity extends AppCompatActivity
      *  是否是Android 10以上手机
      */
     private boolean isAndroidQ = Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q;
+    private EditText url_link;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,12 +92,85 @@ public class MainActivity extends AppCompatActivity
                 showSearchPreview();
             }
         });
-
+        url_link =(EditText)findViewById(R.id.urltext);
+        findViewById(R.id.url).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDownloadPreview();
+            }
+        });
         //add a button
 
     }
+    private void showDownloadPreview() {
+        // BEGIN_INCLUDE(startCamera)
+        // Check if the Camera permission has been granted
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED) {
+            Snackbar.make(mLayout,
+                    R.string.photo_permission_available,
+                    Snackbar.LENGTH_SHORT).show();
+            downloadPhoto();
+        } else {
+            RequestPhotoPreview();
+        }
+    }
+    private void downloadPhoto(){
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        String dir ="/storage/emulated/0/Download";
+        String url = url_link.getText().toString();
+        try {
+            uri = writeToDisk(MainActivity.this, url,storageDir.getAbsolutePath());
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    private final BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID,-1);
+            if (downloadID == id){
+                Uri uri = downloadManager.getUriForDownloadedFile(id);
+                unregisterReceiver(onDownloadComplete);
+                Log.i(TAG, "onReceive: ");
+                String path = getFileRealPath(uri);
+                openPhoto(path);
+
+            }
+        }
+    };
+
+    public Uri writeToDisk(Context context, @NonNull String imageUrl, @NonNull String downloadSubfolder) {
+        Uri imageUri = Uri.parse(imageUrl);
+        String fileName = imageUri.getLastPathSegment();
+        String downloadSubpath = downloadSubfolder + fileName;
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//        String imageFileName = "JPEG_" + timeStamp;
+//        String downloadSubpath = downloadSubfolder + "/"+imageFileName+".jpeg";
+        downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+        DownloadManager.Request request = new DownloadManager.Request(imageUri);
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDescription(imageUrl);
+        request.allowScanningByMediaScanner();
+        request.setDestinationUri(getDownloadDestination(downloadSubpath));
+        try {
+            downloadID = downloadManager.enqueue(request);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return getDownloadDestination(downloadSubpath);
+    }
+    @NonNull private static Uri getDownloadDestination(String downloadSubpath) {
+        File picturesFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File destinationFile = new File(picturesFolder, downloadSubpath);
+        destinationFile.mkdirs();
+        return Uri.fromFile(destinationFile);
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -192,7 +254,7 @@ public class MainActivity extends AppCompatActivity
                     new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
         }
     }
-
+//start camera
     private void startCamera() {
 //        File file = new File(Environment.getExternalStorageDirectory(), "takePhotoDemo");
 //        if (!file.exists()) {
@@ -222,10 +284,11 @@ public class MainActivity extends AppCompatActivity
 
         Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // 判断是否有相机
-//        if (captureIntent.resolveActivity(getPackageManager()) != null) {
-//            File photoFile = null;
-//            Uri photoUri = null;
-//
+        if (captureIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
+            Uri photoUri = null;
+            Intent takePic = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(takePic,0);
 //            if (isAndroidQ) {
 //                // 适配android 10
 //                photoUri = createImageUri();
@@ -244,31 +307,29 @@ public class MainActivity extends AppCompatActivity
 //                    takephoto = photoURI;
 //                    captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 //                    startActivityForResult(captureIntent, REQUEST_TAKE_PHOTO);
-//                }
-////                if (photoFile != null) {
-////
-////                    mCameraImagePath = photoFile.getAbsolutePath();
-////                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-////                        //适配Android 7.0文件权限，通过FileProvider创建一个content类型的Uri //
-////                        photoUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", photoFile);
-////                    } else {
-////                        photoUri = Uri.fromFile(photoFile);
-////                    }
-////                }
-//            }
+                }
+//                if (photoFile != null) {
 //
-////            mCameraUri = photoUri;
-////            if (photoUri != null) {
-////                captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-////                Log.i("aaaaaaa", "startCamera: "+photoUri);
-////                captureIntent.putExtra("return-data", true);
-////                takephoto = photoUri;
-////               // captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-////                startActivityForResult(captureIntent, REQUEST_TAKE_PHOTO);
-////            }
-//        }
-        //String file = dir+crea
-    }
+//                    mCameraImagePath = photoFile.getAbsolutePath();
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                        //适配Android 7.0文件权限，通过FileProvider创建一个content类型的Uri //
+//                        photoUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", photoFile);
+//                    } else {
+//                        photoUri = Uri.fromFile(photoFile);
+//                    }
+//                }
+            }
+
+//            mCameraUri = photoUri;
+//            if (photoUri != null) {
+//                captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+//                Log.i("aaaaaaa", "startCamera: "+photoUri);
+//                captureIntent.putExtra("return-data", true);
+//                takephoto = photoUri;
+//               // captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+//                startActivityForResult(captureIntent, REQUEST_TAKE_PHOTO);
+//            }
+
     private Uri createImageUri() {
         String status = Environment.getExternalStorageState();
         // 判断是否有SD卡,优先使用SD卡存储,当没有SD卡时使用手机存储
@@ -369,11 +430,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void launchPhoto() {
+//        Intent intent = new Intent();
+//        intent.setType("image/*");
+//        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
+//        intent.setAction(Intent.ACTION_GET_CONTENT);
+//        startActivityForResult();
         Intent intent = new Intent(this, PhotoGallery.class);
-        startActivityForResult(intent, REQUEST_CHOOSE_PHOTO);
+//        startActivityForResult(intent, REQUEST_CHOOSE_PHOTO);
 //        Intent intent = new Intent(Intent.ACTION_PICK);
 //        intent.setType("image/*");String
-//        startActivityForResult(intent, REQUEST_CHOOSE_PHOTO);
+        startActivityForResult(intent, REQUEST_CHOOSE_PHOTO);
     }
 
     private void launchSearch() {
@@ -390,6 +456,15 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this,Batch.class);
         intent.putExtra("path_list", pathList);
         startActivity(intent);
+    }
+
+    private  String getFileRealPath(Uri uri){
+        Cursor cursor = getContentResolver().query(uri, new String[]{MediaStore.Images.ImageColumns.DATA},null,null,null);
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        cursor.moveToFirst();
+        String path = cursor.getString(idx);
+        cursor.close();
+        return path;
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -416,12 +491,21 @@ public class MainActivity extends AppCompatActivity
                     if (resultCode == RESULT_OK) {
                         ArrayList<String> imagesPathList = new ArrayList<String>();
                         String[] imagesPath = data.getStringExtra("data").split("\\|");
+//                        ArrayList<Uri> uris = new ArrayList<>();
+//                        if (data.getData()!=null){
+//                            uris.add(data.getData());
+//                        }else if (data.getClipData()!=null){
+//                            ClipData clipData = data.getClipData();
+//                            for (int i = 0; i < clipData.getItemCount(); i++) {
+//                                uris.add(clipData.getItemAt(i).getUri());
+//                            }
+//                        }
 
-                        for (int i = 0; i < imagesPath.length; i++) {
+//                        for (Uri uri : uris) imagesPathList.add(getFileRealPath(uri));
+                        for (int i=0;i<imagesPath.length;i++){
                             // 加入所有选定的path
                             imagesPathList.add(imagesPath[i]);
                         }
-
                         if (imagesPathList.size() == 1) openPhoto(imagesPathList.get(0));
                         else openPhotoList(imagesPathList.stream().toArray(String[]::new));
                     }
@@ -443,7 +527,7 @@ public class MainActivity extends AppCompatActivity
 
                     // 如果只有一个，就编辑
                     if (imagesPathList.size() == 1) openPhoto(imagesPathList.get(0));
-                    else openPhoto(imagesPathList.get(0));
+                    else openPhotoList(imagesPathList.stream().toArray(String[]::new));
 
 
                 }else {

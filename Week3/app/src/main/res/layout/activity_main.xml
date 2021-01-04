@@ -24,17 +24,33 @@
 
     <Button
         android:id="@+id/open_photo"
-        app:layout_constraintBottom_toTopOf="@+id/url"
+        app:layout_constraintBottom_toTopOf="@+id/url_space"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="getPhoto"
         />
+    <LinearLayout
+        android:id="@+id/url_space"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent">
     <Button
         android:id="@+id/url"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_width="match_parent"
+        app:layout_constraintStart_toEndOf="@+id/urltext"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="URL get photo"
         />
+    <EditText
+        android:id="@+id/urltext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/url"
+        android:layout_weight="9"
+        android:text="URL" />
 
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
