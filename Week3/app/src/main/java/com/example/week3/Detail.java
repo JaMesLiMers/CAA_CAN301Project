@@ -10,8 +10,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -54,6 +57,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Date;
 
+import gdut.bsx.share2.Share2;
+import gdut.bsx.share2.ShareContentType;
+
 public class Detail extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, AMap.OnMapClickListener {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView recyclerView;
@@ -75,6 +81,10 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        builder.detectFileUriExposure();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.detail);
        // mLayout = findViewById(R.id.main_layout); // 主界面
@@ -99,12 +109,36 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
         // for aMap
         setDialogAMap(savedInstanceState);
 
-
-
-
-
-
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.tool_bar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.toolbar_share) {
+
+            new Share2.Builder(this)
+                    .setContentType(ShareContentType.IMAGE)
+                    .setShareFileUri(pre.imageUri)
+                    .setTitle("Share Image")
+                    .build()
+                    .shareBySystem();
+
+            return true;
+        }else if(item.getItemId() == R.id.toolbar_delete){
+
+            removeExifAll();
+
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     protected void setImage(String fileName, Uri imageUri){
         ((TextView)findViewById(R.id.text_image_info)).setText((CharSequence)(fileName + '\n'));
         TextView tv = (TextView)findViewById(R.id.text_image_info);
@@ -426,6 +460,11 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                 pre.removeExifGPS();
         }
 
+        reloadUI();
+    }
+
+    protected void removeExifAll(){
+        pre.removeAllTags();
         reloadUI();
     }
 

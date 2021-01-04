@@ -64,4 +64,7 @@
     <string name="alert_item_remove_others"> remove other properties</string>
     <string name="alert_select_an_action"> select an action</string>
     <string name="text_copied_to_clipboard_message">Text successfully copied to clipboard</string>
+
+    <string name="text_share">Share photo</string>
+    <string name="text_delete">Delete all tags</string>
 </resources>

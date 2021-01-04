@@ -66,4 +66,5 @@ dependencies {
     compile 'com.amap.api:map2d:latest.integration'
     compile 'com.amap.api:location:latest.integration'
     compile 'com.amap.api:search:latest.integration'
+    compile 'gdut.bsx:share2:0.9.3'
 }
