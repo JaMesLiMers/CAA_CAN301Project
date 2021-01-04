@@ -9,13 +9,6 @@
 
 
     <Button
-        android:id="@+id/open_camera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="camera"
-        app:layout_constraintBottom_toTopOf="@+id/open_search" />
-
-    <Button
         android:id="@+id/open_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

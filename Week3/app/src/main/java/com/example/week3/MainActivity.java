@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -68,18 +69,22 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        builder.detectFileUriExposure();
+
         // 初始化view， 添加listener
         super.onCreate(savedInstanceState);
         //load layout
         Log.i(TAG, "onCreate: create");
         setContentView(R.layout.activity_main);
         mLayout = findViewById(R.id.main_layout); // 主界面
-        findViewById(R.id.open_camera).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showCameraPreview();
-            }
-        });
+//        findViewById(R.id.open_camera).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                showCameraPreview();
+//            }
+//        });
         findViewById(R.id.open_photo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
