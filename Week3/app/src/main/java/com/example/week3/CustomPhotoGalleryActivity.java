@@ -215,6 +215,9 @@ public class CustomPhotoGalleryActivity extends Activity {
                     Address returnAddress = addresses.get(0);
 
                     cityName = returnAddress.getLocality();
+                    if (cityName == null){
+                        cityName = "";
+                    }
                     String name = returnAddress.getFeatureName();
                     String subLocality = returnAddress.getSubLocality();
                     String country = returnAddress.getCountryName();
