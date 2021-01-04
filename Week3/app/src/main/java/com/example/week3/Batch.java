@@ -105,7 +105,6 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         gridView.setAdapter(new ImageGridAdapter(this, path));
         //set pre
         pre = photoList.get(0);
-        Log.i(TAG, "onCreate: "+pre);
 //        if(pre.getLongitude() != null && pre.getLatitude()!=null) {
 //            temp_lon = pre.getLongitude();
 //            temp_lat = pre.getLatitude();
@@ -146,8 +145,8 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
             @Override
             public void onClick(View view) {
                 //fine
-//                temp_lon = pre.getLongitude();
-//                temp_lat = pre.getLatitude();
+                temp_lon = pre.getLongitude();
+                temp_lat = pre.getLatitude();
                 openDialogMap();
 
             }
@@ -215,7 +214,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                     .inflate(R.layout.map_dialog_two, null);
         mapDialogBuilder.setTitle("MapDialog");
         mapDialogBuilder.setView(dialogView);
-        //refreshMapTarget(mMap);
+
         mapDialogBuilder.setPositiveButton("confirm",
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -225,7 +224,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                             pre.setLatitude(lat);
                             pre.setLongitude(lon);
                             for (PhotoDetailPresenter pre : photoList) {
-                        pre.setExifGPS(lat,lon);
+                        pre.setExifGPS(lon, lat);
                         pre.setLatitude(lat);
                         pre.setLongitude(lon);
                     }
@@ -287,7 +286,6 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                 .position(target)
                 .title("Marker to select"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
-
     }
 
 
