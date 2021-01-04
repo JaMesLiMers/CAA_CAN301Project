@@ -155,7 +155,18 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         gps_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               removeTags(pre.exifTagsList.get(0));
+               AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the GPS information?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                removeTags(pre.exifTagsList.get(0));
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
 
             }
         });
@@ -172,7 +183,18 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         camera_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                removeTags(pre.exifTagsList.get(2));
+              AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the camera information?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                removeTags(pre.exifTagsList.get(2));
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
 
             }
         });
@@ -189,7 +211,18 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         date_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                removeTags(pre.exifTagsList.get(1));
+                AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the date information?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                removeTags(pre.exifTagsList.get(1));
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
 
             }
         });
@@ -198,12 +231,73 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         all_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for(PhotoDetailPresenter pre: photoList){
-                    pre.removeAllTags();
-                }
+              AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the information?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                for(PhotoDetailPresenter pre: photoList){
+                                  pre.removeAllTags();
+                                }
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
+                
             }
         });
 
+    }
+      @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.tool_bar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.toolbar_share) {
+            ArrayList<Uri> uris = new ArrayList<Uri>();
+            for(PhotoDetailPresenter pre: photoList){
+                uris.add(pre.imageUri);
+            }
+            boolean multiple = uris.size() > 1;
+            Intent intent = new Intent(multiple ? android.content.Intent.ACTION_SEND_MULTIPLE
+                    : android.content.Intent.ACTION_SEND);
+
+            if (multiple) {
+                intent.setType("image/*");
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+            } else {
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_STREAM, uris.get(0));
+            }
+            startActivity(Intent.createChooser(intent, "Share"));
+
+            return true;
+        }else if(item.getItemId() == R.id.toolbar_delete){
+
+            AlertDialog.Builder adb = new AlertDialog.Builder(this);
+            adb.setTitle("Are you sure to delete all the information? This operation could not be reverted.")
+                    .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            for(PhotoDetailPresenter pre: photoList){
+                                pre.removeAllTags();
+                            }
+                        }
+                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            }).show();
+
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
     protected void openDialogMap(){
         mapDialog.show();

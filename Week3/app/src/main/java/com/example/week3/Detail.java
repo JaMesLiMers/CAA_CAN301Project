@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
@@ -40,7 +41,7 @@ import com.example.week3.exifTool.*;
 import com.example.week3.exifTool.Type;
 import com.example.week3.exifTool.PhotoDetailPresenter;
 import com.example.week3.exifTool.ViewExtensionKt;
-import com.example.week3.interactor.mapInteractor;
+//import com.example.week3.interactor.mapInteractor;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -449,23 +450,67 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
 //    }
 
     protected void removeTags(ExifTagsContainer item){
+        AlertDialog.Builder adb = new AlertDialog.Builder(this);
         switch (item.getType()){
             case DATE:
-                pre.removeExifDate();
+                adb.setTitle("Are you sure to delete the data information?")
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        pre.removeExifDate();
+                        reloadUI();
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
                 break;
             case CAMERA_PROPERTIES:
-                pre.removeExifCamera();
+                adb.setTitle("Are you sure to delete the data information?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                pre.removeExifCamera();
+                                reloadUI();
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
                 break;
             case GPS:
-                pre.removeExifGPS();
+                adb.setTitle("Are you sure to delete the GPS information?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                pre.removeExifGPS();
+                                reloadUI();
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
         }
-
         reloadUI();
     }
 
     protected void removeExifAll(){
-        pre.removeAllTags();
-        reloadUI();
+        AlertDialog.Builder adb = new AlertDialog.Builder(this);
+        adb.setTitle("Are you sure to delete all the data information? This operation could not be reverted.")
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        pre.removeAllTags();
+                        reloadUI();
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        }).show();
     }
 
 
