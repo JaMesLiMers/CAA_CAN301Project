@@ -134,7 +134,7 @@ public class PhotoGallery extends Activity {
                         final int DRAWABLE_TOP = 1;
                         final int DRAWABLE_RIGHT = 2;
                         final int DRAWABLE_BOTTOM = 3;
-
+                        if (searchbar.getCompoundDrawables()[DRAWABLE_RIGHT]==null)
                         if(event.getRawX() >= searchbar.getRight()-(searchbar.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width()))
                         {
                             clear();
@@ -166,7 +166,6 @@ public class PhotoGallery extends Activity {
         });
 
         edit.setOnClickListener(v -> {
-            Log.i(TAG, "onClick: asdasd");
             int cnt = 0;
             for (boolean b : all_thumbnailsselection) {
                 if (b) {
@@ -310,11 +309,11 @@ public class PhotoGallery extends Activity {
     public void search(String keyword){
         grdImages.setAdapter(null);
         int count = 0;
-        ArrayList ids_ = new ArrayList<Integer>();
+        ArrayList<Integer> ids_ = new ArrayList<>();
 
         // Filter all images by searching
         for (int i = 0; i < all_count; i++) {
-            if (all_city[i].toLowerCase().equals(keyword)){
+            if (all_city[i].toLowerCase().contains(keyword.trim().toLowerCase())){
                 count += 1;
                 ids_.add(all_ids[i]);
             }
@@ -345,6 +344,7 @@ public class PhotoGallery extends Activity {
 
     public String getAddress(double latitude, double longitude) {
         String cityName = "";
+        String state = "";
         List<Address> addresses;
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 
@@ -359,12 +359,7 @@ public class PhotoGallery extends Activity {
                     if (cityName == null){
                         cityName = "";
                     }
-//                    String name = returnAddress.getFeatureName();
-//                    String subLocality = returnAddress.getSubLocality();
-//                    String country = returnAddress.getCountryName();
-//                    String region_code = returnAddress.getCountryCode();
-//                    String zipcode = returnAddress.getPostalCode();
-//                    String state = returnAddress.getAdminArea();
+                    state = returnAddress.getAdminArea();
 
                 }
             } else {
@@ -375,6 +370,7 @@ public class PhotoGallery extends Activity {
         }finally {
             // remove "City"
             cityName = cityName.split(" ")[0];
+            if (state!=null)cityName+= state.split(" ")[0];
             return cityName;
         }
     }
@@ -434,6 +430,13 @@ public class PhotoGallery extends Activity {
         if (imageAdapter!=null)imageAdapter.reset();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getAllLatLon();
+        getAllCity();
+
+    }
 
     @Override
     public void onBackPressed() {
@@ -526,15 +529,23 @@ public class PhotoGallery extends Activity {
             holder.chkImage.setOnClickListener(v -> {
                 CheckBox cb = (CheckBox) v;
                 int id = cb.getId();
-                if (all_thumbnailsselection[id]) {
+                int target = ids[id];
+                int target_index = 0;
+                for (int i = 0; i < all_ids.length; i++){
+                    if (all_ids[i] == target){
+                        target_index = i;
+                    }
+                }
+
+                if (all_thumbnailsselection[target_index]) {
                     cb.setChecked(false);
                     checkedBox.remove(holder.chkImage);
                     checked-=1;
 
-                    all_thumbnailsselection[id] = false;
+                    all_thumbnailsselection[target_index] = false;
                 } else {
                     cb.setChecked(true);
-                    all_thumbnailsselection[id] = true;
+                    all_thumbnailsselection[target_index] = true;
                     checkedBox.add(holder.chkImage);
 
                     checked+=1;
@@ -544,27 +555,36 @@ public class PhotoGallery extends Activity {
             });
             holder.imgThumb.setOnClickListener(v -> {
                 int id = holder.chkImage.getId();
-                if (all_thumbnailsselection[id]) {
+                int target = ids[id];
+                int target_index = 0;
+                for (int i = 0; i < all_ids.length; i++){
+                    if (all_ids[i] == target){
+                        target_index = i;
+                    }
+                }
+                if (all_thumbnailsselection[target_index]) {
                     holder.chkImage.setChecked(false);
                     checkedBox.remove(holder.chkImage);
-                    all_thumbnailsselection[id] = false;
+                    all_thumbnailsselection[target_index] = false;
                     checked-=1;
                 } else {
                     holder.chkImage.setChecked(true);
                     checkedBox.add(holder.chkImage);
-                    all_thumbnailsselection[id] = true;
+                    all_thumbnailsselection[target_index] = true;
                     checked+=1;
                 }
                 updateTheTextOnEditButton();
             });
-                new Thread(()->{
-                    Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(getApplicationContext().getContentResolver(), ids[position], MediaStore.Images.Thumbnails.MICRO_KIND, null);
+            int finalPosition = position;
+            new Thread(()->{
+                    Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(getApplicationContext().getContentResolver(), ids[finalPosition], MediaStore.Images.Thumbnails.MICRO_KIND, null);
                     runOnUiThread(()->holder.imgThumb.setImageBitmap(bitmap));
                 }).start();
             holder.chkImage.setChecked(all_thumbnailsselection[position]);
             holder.id = position;
             return convertView;
         }
+
         int checked(){
             int count = 0;
             for (int i = 0; i < all_thumbnailsselection.length; i++) {
@@ -596,5 +616,4 @@ public class PhotoGallery extends Activity {
         CheckBox chkImage;
         int id;
     }
-
 }
