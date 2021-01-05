@@ -149,9 +149,11 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
     //recycle
     protected void setExifData(List<ExifTagsContainer> list){
         for(final ExifTagsContainer container:list){
+            TextView textView;
             switch (container.getType()){
                 case GPS:
-                    ((ImageView)findViewById(R.id.image_photo_gps)).setImageResource(R.drawable.ic_pin_drop_black_24dp);
+                    textView = findViewById(R.id.text_type_gps);
+                    textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pin_drop_black_24dp,0,0,0);
                     ((TextView)findViewById(R.id.text_property_gps)).setText(container.getOnStringProperties());
                     findViewById(R.id.gps).setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -161,7 +163,8 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                     });
                     break;
                 case CAMERA_PROPERTIES:
-                    ((ImageView)findViewById(R.id.image_photo_camera)).setImageResource(R.drawable.ic_photo_camera_black_24dp);
+                    textView = findViewById(R.id.text_type_camera);
+                    textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_photo_24px,0,0,0);
                     ((TextView)findViewById(R.id.text_property_camera)).setText(container.getOnStringProperties());
                     findViewById(R.id.camera).setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -171,7 +174,8 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                     });
                     break;
                 case DATE:
-                    ((ImageView)findViewById(R.id.image_photo_date)).setImageResource(R.drawable.ic_date_range_black_24dp);
+                    textView = findViewById(R.id.text_type_date);
+                    textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_date_range_black_24dp,0,0,0);
                     ((TextView)findViewById(R.id.text_property_date)).setText(container.getOnStringProperties());
                     findViewById(R.id.date).setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -181,7 +185,8 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                     });
                     break;
                 case DIMENSION:
-                    ((ImageView)findViewById(R.id.image_photo_dimension)).setImageResource(R.drawable.ic_photo_size_select_actual_black_24dp);
+                    textView = findViewById(R.id.text_type_dimension);
+                    textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_photo_size_select_actual_black_24dp,0,0,0);
                     ((TextView)findViewById(R.id.text_property_dimension)).setText(container.getOnStringProperties());
                     findViewById(R.id.dimension).setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -191,7 +196,8 @@ public class Detail extends AppCompatActivity implements OnMapReadyCallback, Goo
                     });
                     break;
                 case OTHER:
-                    ((ImageView)findViewById(R.id.image_photo_other)).setImageResource(R.drawable.ic_blur_on_black_24dp);
+                    textView = findViewById(R.id.text_type_other);
+                    textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_blur_on_black_24dp,0,0,0);
                     ((TextView)findViewById(R.id.text_property_other)).setText(container.getOnStringProperties());
                     findViewById(R.id.other).setOnClickListener(new View.OnClickListener() {
                         @Override

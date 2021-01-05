@@ -24,7 +24,6 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:title="xxxx"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <FrameLayout
@@ -77,23 +76,24 @@
     </com.google.android.material.appbar.AppBarLayout>
     <androidx.core.widget.NestedScrollView
         android:id="@+id/image_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    >
     <LinearLayout
         android:id="@+id/gps"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
-        <ImageView
-            android:id="@+id/image_photo_gps"
-            android:layout_width="0dp"
-            android:layout_weight="0.2"
-            android:layout_height="match_parent"/>
+<!--        <ImageView-->
+<!--            android:id="@+id/image_photo_gps"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_weight="0.2"-->
+<!--            android:layout_height="match_parent"/>-->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="1.0"
@@ -104,14 +104,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="GPS"
-                android:textColor="@color/colorPrimary"
-                android:textSize="40sp" />
+                android:textColor="@color/white"
+                android:textSize="25sp"
+                android:background="@color/colorPrimary"
+                android:paddingStart="8dp"
+
+                />
             <TextView
                 android:id="@+id/text_property_gps"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorPrimary"
-                android:textSize="30sp" />
+                android:textSize="18sp"
+                android:paddingStart="20dp"
+
+                />
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
@@ -119,11 +126,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
-        <ImageView
-            android:id="@+id/image_photo_camera"
-            android:layout_width="0dp"
-            android:layout_weight="0.2"
-            android:layout_height="match_parent"/>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="1.0"
@@ -133,15 +135,21 @@
                 android:id="@+id/text_type_camera"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorPrimary"
-                android:textSize="40sp"
-                android:text="camera"/>
+                android:textColor="@color/white"
+                android:textSize="25sp"
+                android:background="@color/colorPrimary"
+                android:text="Camera"
+                android:paddingStart="8dp"
+
+                />
             <TextView
                 android:id="@+id/text_property_camera"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorPrimary"
-                android:textSize="30sp" />
+                android:textSize="18sp"
+                android:paddingStart="20dp"
+                />
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
@@ -149,11 +157,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
-        <ImageView
-            android:id="@+id/image_photo_date"
-            android:layout_width="0dp"
-            android:layout_weight="0.2"
-            android:layout_height="match_parent"/>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="1.0"
@@ -163,15 +166,21 @@
                 android:id="@+id/text_type_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorPrimary"
-                android:textSize="40sp"
-                android:text="date"/>
+                android:textColor="@color/white"
+                android:textSize="25sp"
+                android:background="@color/colorPrimary"
+                android:text="Date"
+                android:paddingStart="8dp"
+
+                />
             <TextView
                 android:id="@+id/text_property_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorPrimary"
-                android:textSize="30sp"/>
+                android:textSize="18sp"
+                android:paddingStart="20dp"
+                />
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
@@ -179,11 +188,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
-        <ImageView
-            android:id="@+id/image_photo_dimension"
-            android:layout_width="0dp"
-            android:layout_weight="0.2"
-            android:layout_height="match_parent"/>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="1.0"
@@ -193,15 +197,20 @@
                 android:id="@+id/text_type_dimension"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorPrimary"
-                android:textSize="40sp"
-                android:text="Dimension"/>
+                android:textColor="@color/white"
+                android:textSize="25sp"
+                android:background="@color/colorPrimary"
+                android:text="Dimension"
+                android:paddingStart="8dp"
+                />
             <TextView
                 android:id="@+id/text_property_dimension"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorPrimary"
-                android:textSize="30sp" />
+                android:textSize="18sp"
+                android:paddingStart="20dp"
+                />
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
@@ -209,11 +218,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
-        <ImageView
-            android:id="@+id/image_photo_other"
-            android:layout_width="0dp"
-            android:layout_weight="0.2"
-            android:layout_height="match_parent"/>
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="1.0"
@@ -223,21 +228,27 @@
                 android:id="@+id/text_type_other"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorPrimary"
-                android:textSize="40sp"
-                android:text="Other"/>
+                android:textColor="@color/white"
+                android:textSize="25sp"
+                android:background="@color/colorPrimary"
+                android:text="Other"
+                android:paddingStart="8dp"
+
+                />
             <TextView
                 android:id="@+id/text_property_other"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorPrimary"
-                android:textSize="30sp" />
+                android:textSize="18sp"
+                android:paddingStart="20dp"
+                />
         </LinearLayout>
     </LinearLayout>
 
 
 </LinearLayout>
-        
+
 
     </androidx.core.widget.NestedScrollView>
 

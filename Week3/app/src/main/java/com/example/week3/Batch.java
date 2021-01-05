@@ -37,7 +37,7 @@ import androidx.exifinterface.media.ExifInterface;
 
 import com.amap.api.maps2d.AMap;
 import com.bumptech.glide.Glide;
-
+import com.example.week3.Detail;
 
 import com.example.week3.exifTool.ExifTagsContainer;
 import com.example.week3.exifTool.PhotoDetailPresenter;
@@ -58,9 +58,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import gdut.bsx.share2.Share2;
-import gdut.bsx.share2.ShareContentType;
-
 public class Batch extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private static final String TAG = "CustomPhotoGalleryActivity";
     private GridView grdImages;
@@ -80,7 +77,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
     private PhotoDetailPresenter pre;
     double temp_lon = 0;
     double temp_lat = 0;
-
+    private Context context=this;
     //Calendar
     private int mYear;
     private int mMonth;
@@ -115,6 +112,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         gridView.setAdapter(new ImageGridAdapter(this, path));
         //set pre
         pre = photoList.get(0);
+        Log.i(TAG, "onCreate: "+pre);
 //        if(pre.getLongitude() != null && pre.getLatitude()!=null) {
 //            temp_lon = pre.getLongitude();
 //            temp_lat = pre.getLatitude();
@@ -143,11 +141,11 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         mMonth = ca.get(Calendar.MONTH);
         mDay = ca.get(Calendar.DAY_OF_MONTH);
 
-        ((ImageView) findViewById(R.id.image_photo_gps)).setImageResource(R.drawable.ic_pin_drop_black_24dp);
-        ((ImageView) findViewById(R.id.image_photo_camera)).setImageResource(R.drawable.ic_photo_camera_black_24dp);
-        ((ImageView) findViewById(R.id.image_photo_date)).setImageResource(R.drawable.ic_date_range_black_24dp);
+//        ((ImageView) findViewById(R.id.image_photo_gps)).setImageResource(R.drawable.ic_pin_drop_black_24dp);
+//        ((ImageView) findViewById(R.id.image_photo_camera)).setImageResource(R.drawable.ic_photo_camera_black_24dp);
+//        ((ImageView) findViewById(R.id.image_photo_date)).setImageResource(R.drawable.ic_date_range_black_24dp);
 
-        Context context = this;
+
         //gps
         gps_del = findViewById(R.id.gps_delete);
         gps_edit = findViewById(R.id.gps_edit);
@@ -155,8 +153,8 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
             @Override
             public void onClick(View view) {
                 //fine
-                temp_lon = pre.getLongitude();
-                temp_lat = pre.getLatitude();
+//                temp_lon = pre.getLongitude();
+//                temp_lat = pre.getLatitude();
                 openDialogMap();
 
             }
@@ -164,7 +162,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         gps_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder adb = new AlertDialog.Builder(context);
+               AlertDialog.Builder adb = new AlertDialog.Builder(context);
                 adb.setTitle("Are you sure to delete all the GPS information?")
                         .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                             @Override
@@ -176,6 +174,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                         dialog.cancel();
                     }
                 }).show();
+
             }
         });
         //camera
@@ -191,8 +190,8 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         camera_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder adb = new AlertDialog.Builder(context);
-                adb.setTitle("Are you sure to delete all the camera properties?")
+              AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the camera information?")
                         .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
@@ -216,7 +215,6 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
 
             }
         });
-
         date_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -240,13 +238,13 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         all_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder adb = new AlertDialog.Builder(context);
-                adb.setTitle("Are you sure to delete all the information? This operation could not be reverted.")
+              AlertDialog.Builder adb = new AlertDialog.Builder(context);
+                adb.setTitle("Are you sure to delete all the information?")
                         .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 for(PhotoDetailPresenter pre: photoList){
-                                    pre.removeAllTags();
+                                  pre.removeAllTags();
                                 }
                             }
                         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -254,14 +252,12 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                         dialog.cancel();
                     }
                 }).show();
-
+                
             }
         });
 
     }
-
-
-    @Override
+      @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.tool_bar_menu, menu);
         return true;
@@ -310,8 +306,6 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         }
         return super.onOptionsItemSelected(item);
     }
-
-
     protected void openDialogMap(){
         mapDialog.show();
     }
@@ -322,7 +316,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                     .inflate(R.layout.map_dialog_two, null);
         mapDialogBuilder.setTitle("MapDialog");
         mapDialogBuilder.setView(dialogView);
-
+        //refreshMapTarget(mMap);
         mapDialogBuilder.setPositiveButton("confirm",
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -332,7 +326,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                             pre.setLatitude(lat);
                             pre.setLongitude(lon);
                             for (PhotoDetailPresenter pre : photoList) {
-                        pre.setExifGPS(lon, lat);
+                        pre.setExifGPS(lat,lon);
                         pre.setLatitude(lat);
                         pre.setLongitude(lon);
                     }
@@ -394,6 +388,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                 .position(target)
                 .title("Marker to select"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
+
     }
 
 
@@ -477,7 +472,6 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
                 }
         }
     }
-
 
     @Override
     public void onBackPressed() {
