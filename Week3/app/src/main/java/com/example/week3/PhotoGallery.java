@@ -220,7 +220,6 @@ public class PhotoGallery extends Activity {
 
         // 获取图片信息
         for (int i = 0; i < this.all_count; i++) {
-
             imagecursor.moveToPosition(i);
             // get图片id
             all_ids[i] = imagecursor.getInt(image_column_index);
@@ -420,7 +419,7 @@ public class PhotoGallery extends Activity {
 
         try {
             downloadID = downloadManager.enqueue(request);
-            found(Status.LOADING);
+            loading("downloading...");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -466,7 +465,6 @@ public class PhotoGallery extends Activity {
                 grdImages.invalidateViews();
                 return;
             }
-            grdImages.invalidateViews();
         }
 
         super.onBackPressed();
