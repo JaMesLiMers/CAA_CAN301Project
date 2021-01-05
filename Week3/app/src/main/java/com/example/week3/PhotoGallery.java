@@ -15,7 +15,6 @@ import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -24,7 +23,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -34,20 +32,21 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.example.week3.exifTool.PhotoDetailPresenter;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,7 +56,9 @@ public class PhotoGallery extends Activity {
     private Button edit;
     private Button btnSearch;
     private EditText strSearch;
+    private TextView loadingNotice;
     private View notFound;
+    private View loading;
     private ImageAdapter initAdapter;
     private ImageAdapter imageAdapter;
     private String[] all_arrPath;
@@ -70,6 +71,11 @@ public class PhotoGallery extends Activity {
     private DownloadManager downloadManager;
     long downloadID;
     int checked;
+    int remaining;
+
+    private enum Status{
+        FOUND,NOT_FOUND,LOADING
+    }
 
     private final BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
         @Override
@@ -78,13 +84,13 @@ public class PhotoGallery extends Activity {
             if (downloadID == id){
                 Uri uri = downloadManager.getUriForDownloadedFile(id);
                 unregisterReceiver(onDownloadComplete);
-                Log.i(TAG, "onReceive: ");
                 String path = getFileRealPath(uri);
                 openPhoto(path);
                 if (searchbar!=null){
                     searchbar.setEnabled(true);
                     searchbar.setText("");
                 }
+
             }
         }
     };
@@ -96,19 +102,19 @@ public class PhotoGallery extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos);
-        // 所有图片
         RequestPhotoPreview();
 
     }
 
     private void init(){
-        Log.i(TAG, "init: aaaaaaaaa");
         downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         grdImages= (GridView) findViewById(R.id.gridImages);
         // 确定按钮
         edit= (Button) findViewById(R.id.edit);
         notFound = (View)findViewById(R.id.not_found);
+        loading = (View)findViewById(R.id.loading);
         //identify the content is url or location
+        loadingNotice=findViewById(R.id.loading_notice);
         searchbar = findViewById(R.id.searchSeparate);
 
         searchbar.addTextChangedListener(new TextWatcher() {
@@ -118,9 +124,7 @@ public class PhotoGallery extends Activity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length()==0) {
-                    searchbar.setCompoundDrawablesWithIntrinsicBounds(R.drawable.places_ic_search, 0, 0, 0);
-                    grdImages.setAdapter((ListAdapter) initAdapter);
-                    searchbar.setOnTouchListener(null);
+                    clear();
                 }else {
                     String input = searchbar.getText().toString();
                     Matcher matcher = pattern.matcher(input);
@@ -136,19 +140,14 @@ public class PhotoGallery extends Activity {
                         final int DRAWABLE_RIGHT = 2;
                         final int DRAWABLE_BOTTOM = 3;
 
-                        if(event.getRawX() >= (searchbar.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width()))
+                        if(event.getRawX() >= searchbar.getRight()-(searchbar.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width()))
                         {
-                            searchbar.setText("");
-                            searchbar.setCompoundDrawablesWithIntrinsicBounds(R.drawable.places_ic_search, 0, 0, 0);
-                            found(true);
-                            grdImages.setAdapter((ListAdapter) initAdapter);
+                            clear();
                             return true;
                         }
                         return false;
                     });
                 }
-
-
             }
 
             @Override
@@ -202,7 +201,7 @@ public class PhotoGallery extends Activity {
 
 
         searchbar.setOnFocusChangeListener((v,has)->{
-            if (has)found(true);
+            if (has)found(Status.FOUND);
         });
 
         final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID }; //{"_data, _id"}
@@ -221,6 +220,7 @@ public class PhotoGallery extends Activity {
 
         // 获取图片信息
         for (int i = 0; i < this.all_count; i++) {
+
             imagecursor.moveToPosition(i);
             // get图片id
             all_ids[i] = imagecursor.getInt(image_column_index);
@@ -245,15 +245,24 @@ public class PhotoGallery extends Activity {
 
         // 查询完毕关闭cursor
         imagecursor.close();
-
+        found(Status.FOUND);
 
     }
+    @SuppressLint("ClickableViewAccessibility")
+    private void clear(){
+        if (searchbar.getText().length()!=0)searchbar.setText("");
+        searchbar.setCompoundDrawablesWithIntrinsicBounds(R.drawable.places_ic_search, 0, 0, 0);
+        imageAdapter=initAdapter;
+        grdImages.setAdapter((ListAdapter) initAdapter);
+        found(Status.FOUND);
+        searchbar.setOnTouchListener(null);
 
+    }
     private static final int PERMISSION_REQUEST_CAMERA = 0;
     private static final int PERMISSION_REQUEST_PHOTO = 2;
     private void RequestPhotoPreview() {
         // Permission has not been granted and must be requested.
-        ActivityCompat.requestPermissions(PhotoGallery.this,0
+        ActivityCompat.requestPermissions(PhotoGallery.this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_PHOTO);
     }
     @Override
@@ -273,14 +282,19 @@ public class PhotoGallery extends Activity {
         }
         // END_INCLUDE(onRequestPermissionsResult)
     }
-    private void found(boolean found){
-        if (found){
-            notFound.setVisibility(View.GONE);
-            grdImages.setVisibility(View.VISIBLE);
-        }else {
-            notFound.setVisibility(View.VISIBLE);
-            grdImages.setVisibility(View.GONE);
-        }
+    private void found(Status status) {
+        notFound.setVisibility(View.GONE);
+        loading.setVisibility(View.GONE);
+        grdImages.setVisibility(View.GONE);
+        if (status==Status.FOUND) grdImages.setVisibility(View.VISIBLE);
+        if (status==Status.NOT_FOUND) notFound.setVisibility(View.VISIBLE);
+        if (status==Status.LOADING) loading.setVisibility(View.VISIBLE);
+        loadingNotice.setText(R.string.loading);
+    }
+
+    private void loading(String notice){
+        found(Status.LOADING);
+        loadingNotice.setText(notice);
     }
 
     public boolean getAllLatLon(){
@@ -325,12 +339,12 @@ public class PhotoGallery extends Activity {
         int[] ids = ids_.stream().mapToInt(i -> (int) i).toArray();
 
         // 设定图片预览 （下面的class负责）
-        found(count!=0);
+        found(count!=0?Status.FOUND:Status.NOT_FOUND);
         imageAdapter = new ImageAdapter(count, ids);
         grdImages.setAdapter((ListAdapter) imageAdapter);
     }
 
-    public boolean getAllCity(){
+    public void getAllCity(){
         try{
             for (int i = 0; i < this.all_count; i++) {
                 // get图片id
@@ -340,9 +354,7 @@ public class PhotoGallery extends Activity {
                 // 这里可能要异步运行
                 this.all_city[i] = getAddress(lat, lon);
             }
-            return true;
         }catch (Exception e) {
-            return false;
         }
 
     }
@@ -354,7 +366,7 @@ public class PhotoGallery extends Activity {
 
         try {
             addresses = geocoder.getFromLocation(latitude,longitude,1);
-            if (geocoder.isPresent()) {
+            if (Geocoder.isPresent()) {
                 StringBuilder stringBuilder = new StringBuilder();
                 if (addresses.size()>0) {
                     Address returnAddress = addresses.get(0);
@@ -408,6 +420,7 @@ public class PhotoGallery extends Activity {
 
         try {
             downloadID = downloadManager.enqueue(request);
+            found(Status.LOADING);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -428,49 +441,43 @@ public class PhotoGallery extends Activity {
         Intent intent = new Intent(this,Detail.class);
         intent.putExtra("path_file", path);
         startActivity(intent);
+        clear();
+        if (imageAdapter!=null)imageAdapter.reset();
     }
     private void openPhoto(String[] pathList){
         Intent intent = new Intent(this,Batch.class);
         intent.putExtra("path_list", pathList);
         startActivity(intent);
+        clear();
+        if (imageAdapter!=null)imageAdapter.reset();
     }
 
 
     @Override
     public void onBackPressed() {
-        setResult(Activity.RESULT_CANCELED);
-        super.onBackPressed();
+        if (!searchbar.getText().toString().equals("")){
+            clear();
+            return;
+        }
+        if (imageAdapter!=null){
+            Log.i(TAG, "onBackPressed: "+imageAdapter.checked());
+            if (imageAdapter.checked()!=0){
+                imageAdapter.reset();
+                grdImages.invalidateViews();
+                return;
+            }
+            grdImages.invalidateViews();
+        }
 
+        super.onBackPressed();
     }
 
     /**
      * Class method
      */
 
-    /**
-     * This method used to set bitmap.
-     * @param iv represented ImageView
-     * @param id represented id
-     */
-
-    private void setBitmap(final ImageView iv, final int id) {
-
-        new AsyncTask<Void, Void, Bitmap>() {
-
-            @Override
-            protected Bitmap doInBackground(Void... params) {
-                return MediaStore.Images.Thumbnails.getThumbnail(getApplicationContext().getContentResolver(), id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap result) {
-                super.onPostExecute(result);
-                iv.setImageBitmap(result);
-            }
-        }.execute();
-    }
     private void updateTheTextOnEditButton(){
-        switch (checked){
+        switch (imageAdapter.checked()){
             case 0:
                 edit.setText(R.string.edit_notice);
                 edit.setEnabled(false);
@@ -498,8 +505,10 @@ public class PhotoGallery extends Activity {
         private LayoutInflater mInflater;
         private int count;
         private int[] ids;
+        private Set<CheckBox> checkedBox = new HashSet<>();
 
         public ImageAdapter(int count, int[] ids) {
+            Log.i(TAG, "ImageAdapter: "+"asdasd");
             mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             this.count = count;
             this.ids = ids;
@@ -540,11 +549,15 @@ public class PhotoGallery extends Activity {
                     int id = cb.getId();
                     if (all_thumbnailsselection[id]) {
                         cb.setChecked(false);
+                        checkedBox.remove(holder.chkImage);
                         checked-=1;
+
                         all_thumbnailsselection[id] = false;
                     } else {
                         cb.setChecked(true);
                         all_thumbnailsselection[id] = true;
+                        checkedBox.add(holder.chkImage);
+
                         checked+=1;
                     }
                     updateTheTextOnEditButton();
@@ -557,23 +570,45 @@ public class PhotoGallery extends Activity {
                     int id = holder.chkImage.getId();
                     if (all_thumbnailsselection[id]) {
                         holder.chkImage.setChecked(false);
+                        checkedBox.remove(holder.chkImage);
                         all_thumbnailsselection[id] = false;
                         checked-=1;
                     } else {
                         holder.chkImage.setChecked(true);
+                        checkedBox.add(holder.chkImage);
                         all_thumbnailsselection[id] = true;
                         checked+=1;
                     }
                     updateTheTextOnEditButton();
                 }
             });
-            try {
-                setBitmap(holder.imgThumb, ids[position]);
-            } catch (Throwable e) {
-            }
+                new Thread(()->{
+                    Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(getApplicationContext().getContentResolver(), ids[position], MediaStore.Images.Thumbnails.MICRO_KIND, null);
+                    runOnUiThread(()->holder.imgThumb.setImageBitmap(bitmap));
+                }).start();
             holder.chkImage.setChecked(all_thumbnailsselection[position]);
             holder.id = position;
             return convertView;
+        }
+        int checked(){
+            int count = 0;
+            for (int i = 0; i < all_thumbnailsselection.length; i++) {
+                if (all_thumbnailsselection[i])count+=1;
+            }
+            return count;
+        }
+        void reset(){
+            for (int i = 0; i < all_thumbnailsselection.length; i++) {
+                all_thumbnailsselection[i] =false;
+                for (CheckBox box : checkedBox){
+                    box.setChecked(false);
+
+                }
+                checkedBox.clear();
+                checked=0;
+                updateTheTextOnEditButton();
+
+            }
         }
     }
 
@@ -582,7 +617,7 @@ public class PhotoGallery extends Activity {
      * Inner class
      * @author tasol
      */
-    class ViewHolder {
+    static class ViewHolder {
         ImageView imgThumb;
         CheckBox chkImage;
         int id;
