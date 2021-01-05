@@ -140,7 +140,8 @@ public class PhotoGallery extends Activity {
                         {
                             searchbar.setText("");
                             searchbar.setCompoundDrawablesWithIntrinsicBounds(R.drawable.places_ic_search, 0, 0, 0);
-                            grdImages.setAdapter((ListAdapter) imageAdapter);
+                            found(true);
+                            grdImages.setAdapter((ListAdapter) initAdapter);
                             return true;
                         }
                         return false;
