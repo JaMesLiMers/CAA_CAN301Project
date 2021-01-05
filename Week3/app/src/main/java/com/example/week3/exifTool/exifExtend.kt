@@ -1,9 +1,7 @@
 @file:Suppress("UNCHECKED_CAST")
 package com.example.week3.exifTool
-//import android.media.ExifInterface
 import androidx.exifinterface.media.ExifInterface
 import java.io.IOException
-import java.util.*
 import kotlin.collections.HashMap
 
 
@@ -84,22 +82,4 @@ fun ExifInterface.removeTags(tags: Set<String>,
         onFailure(e)
     }
 }
-
-fun ExifInterface.convertDecimalToDegrees(decimal: Double): String {
-    var latitude = Math.abs(decimal)
-    val degree = latitude.toInt()
-    latitude *= 60
-    latitude -= (degree * 60.0)
-    val minute = latitude.toInt()
-    latitude *= 60
-    latitude -= (minute * 60.0)
-    val second = (latitude * 1000.0).toInt()
-    return "$degree/1,$minute/1,$second/1000"
-}
-
-fun ExifInterface.getLatitudeRef(latitude: Double): String =
-        if (latitude < 0.0) "S" else "N"
-
-fun ExifInterface.getLongitudeRef(longitude: Double): String =
-        if (longitude < 0.0) "W" else "E"
 

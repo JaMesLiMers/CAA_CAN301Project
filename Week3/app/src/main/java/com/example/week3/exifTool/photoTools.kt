@@ -4,10 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.exifinterface.media.ExifInterface
-import com.example.week3.R
 import java.io.File
 import java.io.IOException
-import java.lang.Exception
 import java.util.*
 
 
@@ -45,42 +43,30 @@ class PhotoDetailPresenter(){
     lateinit var file:File
     fun initialize(intent: Intent) {
         this.filePath = intent.getStringExtra("path_file").toString()
-        this.computeTags() // 得到tag
+        this.computeTags() // get tag
 
-        this.setImageByGivenAPath() // 得到 file imageuri 还有 filepath等
-        //populateExifProperties() //直接return
-        //getAddressByTriggerRequest()
+        this.setImageByGivenAPath() // get file imageuri and filepath etc.
+
     }
 
     fun initialize(str: String) {
         this.filePath = str
-        this.computeTags() // 得到tag
-
-        this.setImageByGivenAPath() // 得到 file imageuri 还有 filepath等
-        //populateExifProperties() //直接return
-        //getAddressByTriggerRequest()
+        this.computeTags() // get tag
+        this.setImageByGivenAPath() // get file imageuri get filepath等
     }
 
     private fun computeTags() {
         exifInterface = ExifInterface(filePath)
         val map = exifInterface.getTags()
-        exifTagsList = transformList(map) //拿到list
+        exifTagsList = transformList(map) //get list
         latitude = map["EXIF_LATITUDE"]?.toDouble()
         longitude = map["EXIF_LONGITUDE"]?.toDouble()
     }
 
-//    private fun populateExifProperties() {
-//        view.setExifDataList(exifTagsList)
-//    }
-
     private fun setImageByGivenAPath() {
-        //Log.d(this.javaClass.simpleName, filePath)
         this.imageUri = Uri.fromFile(File(filePath))
         this.file = File(filePath)
-        //view.setImage(file.name, file.getSize(), imageUri)
     }
-
-
 
     private fun transformList(map: HashMap<String, String?>): List<ExifTagsContainer> {
         val locationsList = arrayListOf<ExifField>()
@@ -117,57 +103,6 @@ class PhotoDetailPresenter(){
                 ExifTagsContainer(othersList, Type.OTHER))
     }
 
-    private fun appendZeroIfNeeded(n: Int): String {
-        val s = n.toString()
-        if (s.length == 1)
-            return "0$s"
-        else
-            return s
-    }
-
-//    //TODO: refactor and clean code.
-//    fun changeExifDate(year: Int, month: Int, dayOfMonth: Int) {
-//        val locationExifContainerList = exifTagsList.find { it.type == Type.DATE }?.list!!
-//        val dateTimeShort: String
-//        val dateTimeLong: String
-//
-//        if (locationExifContainerList.isEmpty()) {
-//            val df = SimpleDateFormat("HH:mm:ss")
-//            val calendar = Calendar.getInstance()
-//            dateTimeLong = "$year:${appendZeroIfNeeded(month)}:${appendZeroIfNeeded(dayOfMonth)} ${df.format(calendar.time)}"
-//            dateTimeShort = ""
-//        } else {
-//            val auxListLong = mutableListOf<ExifField>()
-//            locationExifContainerList.forEach {
-//                if (it.attribute.length > 10) auxListLong.add(it)
-//            }
-//            val actualDate = auxListLong.first().attribute.substring(11)
-//            dateTimeLong = "$year:${appendZeroIfNeeded(month)}:${appendZeroIfNeeded(dayOfMonth)} $actualDate"
-//            dateTimeShort = "$year:${appendZeroIfNeeded(month)}:${appendZeroIfNeeded(dayOfMonth)}"
-//        }
-//        try {
-//            if (locationExifContainerList.isEmpty()) {
-//                exifInterface.setAttribute(android.media.ExifInterface.TAG_DATETIME, dateTimeLong)
-//            } else {
-//                locationExifContainerList.forEach {
-//                    if (it.attribute.length > 10)
-//                        exifInterface.setAttribute(it.tag, dateTimeLong)
-//                    else
-//                        exifInterface.setAttribute(it.tag, dateTimeShort)
-//                }
-//            }
-//            exifInterface.saveAttributes()
-//
-//            computeTags()
-//            view.changeExifDataList(exifTagsList)
-//
-//            view.onCompleteDateChanged()
-//            Log.d(this.javaClass.simpleName, "Date was changed: year: $year  month: $month day: $dayOfMonth")
-//        } catch (e: IOException) {
-//            Log.e(this.javaClass.simpleName, "${e.cause} - ${e.message}")
-//            view.onError(view.getContext().resources.getString(R.string.date_changed_message_error))
-//        }
-//    }
     fun setExifDate(datetime: String){
         exifInterface.setAttribute(ExifInterface.TAG_DATETIME, datetime)
         exifInterface.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, datetime)
@@ -209,22 +144,6 @@ class PhotoDetailPresenter(){
     }
 
 
-//    public fun setExifGPS(latitude: Double, longitude: Double){
-//
-//        // Todo：
-//        // "确定" 时：干些什么
-//        // 两样东西存在lat 和 lon里面
-//        // 需要设置和更新
-////        val strLongitude: String = convert(longitude, FORMAT_SECONDS)
-////        val strLatitude: String = convert(latitude, FORMAT_SECONDS)
-//        exifInterface.setAttribute(ExifInterface.TAG_GPS_LATITUDE, latitude.toString())
-//        exifInterface.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, longitude.toString())
-//        try {
-//            exifInterface.saveAttributes()
-//        }catch (e: IOException){
-//            Log.e("pa", "pa", e)
-//        }
-//    }
 fun removeAllTags() {
     exifInterface.removeAllTags(
             onSuccess = {
@@ -305,9 +224,6 @@ fun removeAllTags() {
         return sb.toString()
     }
 
-    private fun createDebugStringBuilder(filePath: File): java.lang.StringBuilder? {
-        return java.lang.StringBuilder("Set Exif to file='").append(filePath.absolutePath).append("'\n\t")
-    }
 
     private fun latitudeRef(latitude: Double): String? {
         return if (latitude < 0.0) "S" else "N"

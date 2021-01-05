@@ -1,50 +1,19 @@
 <resources>
     <string name="app_name">Exifer</string>
-    <string name="title_activity_test">TestActivity</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <!-- Strings used for fragments for navigation --><![CDATA[
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 
-    <string name="show_camera">Show camera preview</string>
-    <string name="camera_unavailable"><b>Camera could not be opened.</b>\nThis occurs when the camera is not available (for example it is already in use) or if the system has denied access (for example when camera access has been disabled).</string>
-    <string name="photo_unavailable">photo could not be opened.</string>>
-    <string name="intro">This sample shows a basic implementation for requesting permissions at runtime.\nClick the button below to request the Camera permission and open a full-screen camera preview.</string>
-    <string name="open_camera_preview">Open Camera Preview</string>
-    <string name="camera_access_required">Camera access is required to display the camera preview.</string>
-    <string name="photo_access_required">Camera access is required to display the photo preview.</string>
-    <string name="ok">OK</string>
-    <string name="camera_permission_not_available">Permission is not available. Requesting camera permission.</string>
-    <string name="photo_permission_available">Photo permission is available. Starting preview.</string>
-    <string name="camera_permission_available">Camera permission is available. Starting preview.</string>
-    <string name="camera_permission_granted">Camera permission was granted. Starting preview.</string>
-    <string name="camera_permission_denied">Camera permission request was denied.</string>
-    <string name="photo_permission_granted">Photo permission was granted. Starting preview.</string>
-    <string name="photo_permission_denied">Photo permission request was denied.</string>
-    <string name="getting_address_error">Something went wrong getting the address</string>
-    <string name="date_changed_message_error">Cannot change location data</string>
-    <string name="location_changed_message_error">Cannot change date</string>
 
-    <string name="edit_location_menu_item">Edit location</string>
-    <string name="done_editing_menu_item">Done editing</string>
 
-    <string name="dialog_maps_title">Location</string>
-    <string name="dialog_maps_title_edit_location">Edit location</string>
-    <string name="dialog_maps_title_tap_for_new_location">Tap the new location</string>
 
-    <string name="dialog_remove_tags_question">Are you sure you want to remove all tags?</string>
-    <string name="dialog_remove_gps_tags_question">Are you sure you want to remove GPS tags?</string>
-    <string name="dialog_remove_tags_caveat">This operation cannot be undone</string>
 
-    <string name="tags_deleted_successfully">Tags deleted successfully</string>
-    <string name="all_tags_deleted_successfully">All tags were deleted successfully</string>
 
-    <string name="dialog_maps_title_edit_location_message">Are you sure you want to set this new location?</string>
 
+
+
+    >
+
+    ]]>
     <string name="dialog_edit_camera_properties_make">Camera make</string>
     <string name="dialog_edit_camera_properties_model">Camera model</string>
 
@@ -52,7 +21,6 @@
     <string name="dialog_edit_camera_properties_cancel">Cancel</string>
 
 
-    <string name="something_went_wrong">Something went wrong</string>
     <string name="alert_item_copy_to_clipboard"> copy to clipboard</string>
     <string name="alert_item_open_map"> open a map (google)</string>
     <string name="alert_item_open_a_map"> open a map (amap)</string>
@@ -61,7 +29,6 @@
     <string name="alert_item_remove_date"> remove date</string>
     <string name="alert_item_edit_camera"> edit camera properties</string>
     <string name="alert_item_remove_camera"> remove camera properties</string>
-    <string name="alert_item_remove_others"> remove other properties</string>
     <string name="alert_select_an_action"> select an action</string>
     <string name="text_copied_to_clipboard_message">Text successfully copied to clipboard</string>
 
@@ -71,7 +38,6 @@
     <string name="nothing">nothing</string>
     <string name="loading">loading…</string>
     <string name="not_exist">Sorry, the photo you searched does not exist.</string>
-    <string name="edit">edit</string>
     <string name="edit_notice">select photos to edit</string>
 
 </resources>

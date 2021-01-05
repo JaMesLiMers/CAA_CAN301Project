@@ -5,15 +5,9 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.location.Address;
-import android.location.Geocoder;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,52 +16,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.exifinterface.media.ExifInterface;
 
-import com.amap.api.maps2d.AMap;
-import com.bumptech.glide.Glide;
-import com.example.week3.Detail;
-
 import com.example.week3.exifTool.ExifTagsContainer;
 import com.example.week3.exifTool.PhotoDetailPresenter;
-import com.example.week3.exifTool.Type;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.MapFragment;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+
 
 public class Batch extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private static final String TAG = "CustomPhotoGalleryActivity";
-    private GridView grdImages;
-    private Button gps_del;
-    private Button gps_edit;
-    private Button camera_del;
-    private Button camera_edit;
-    private Button date_del;
-    private Button date_edit;
-    private Button all_del;
     private GoogleMap mMap;
     private AlertDialog mapDialog;
     private ArrayList<PhotoDetailPresenter> photoList = new ArrayList<>();
@@ -75,9 +50,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
     private double lon = 0;
     private double lat = 0;
     private PhotoDetailPresenter pre;
-    double temp_lon = 0;
-    double temp_lat = 0;
-    private Context context=this;
+    private final Context context = this;
     //Calendar
     private int mYear;
     private int mMonth;
@@ -112,28 +85,12 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         gridView.setAdapter(new ImageGridAdapter(this, path));
         //set pre
         pre = photoList.get(0);
-        Log.i(TAG, "onCreate: "+pre);
-//        if(pre.getLongitude() != null && pre.getLatitude()!=null) {
-//            temp_lon = pre.getLongitude();
-//            temp_lat = pre.getLatitude();
-//        }
+        Log.i(TAG, "onCreate: " + pre);
+
         setDialogMap();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_two);
-//        mapFragment.getMapAsync(new OnMapReadyCallback() {
-//            @Override
-//            public void onMapReady(GoogleMap googleMap) {
-//                if(temp_lon != pre.getLongitude() && temp_lat!=pre.getLatitude()) {
-//                    temp_lon = pre.getLongitude();
-//                    temp_lat = pre.getLatitude();
-//                    for (PhotoDetailPresenter pre : photoList) {
-//                        pre.setExifGPS(temp_lon, temp_lat);
-//                        pre.setLatitude(temp_lon);
-//                        pre.setLongitude(temp_lat);
-//                    }
-//                }
-//            }
-//        });
+
         mapFragment.getMapAsync(this);
 
         Calendar ca = Calendar.getInstance();
@@ -141,123 +98,56 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         mMonth = ca.get(Calendar.MONTH);
         mDay = ca.get(Calendar.DAY_OF_MONTH);
 
-//        ((ImageView) findViewById(R.id.image_photo_gps)).setImageResource(R.drawable.ic_pin_drop_black_24dp);
-//        ((ImageView) findViewById(R.id.image_photo_camera)).setImageResource(R.drawable.ic_photo_camera_black_24dp);
-//        ((ImageView) findViewById(R.id.image_photo_date)).setImageResource(R.drawable.ic_date_range_black_24dp);
+        //GPS
+        Button gps_del = findViewById(R.id.gps_delete);
+        Button gps_edit = findViewById(R.id.gps_edit);
+        gps_edit.setOnClickListener(view -> openDialogMap());
+        gps_del.setOnClickListener(view -> {
+            AlertDialog.Builder adb = new AlertDialog.Builder(context);
+            adb.setTitle("Are you sure to delete all the GPS information?")
+                    .setPositiveButton("Confirm", (dialog, id) -> removeTags(pre.exifTagsList.get(0)))
+                    .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel()).show();
 
-
-        //gps
-        gps_del = findViewById(R.id.gps_delete);
-        gps_edit = findViewById(R.id.gps_edit);
-        gps_edit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //fine
-//                temp_lon = pre.getLongitude();
-//                temp_lat = pre.getLatitude();
-                openDialogMap();
-
-            }
-        });
-        gps_del.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-               AlertDialog.Builder adb = new AlertDialog.Builder(context);
-                adb.setTitle("Are you sure to delete all the GPS information?")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                removeTags(pre.exifTagsList.get(0));
-                            }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                }).show();
-
-            }
         });
         //camera
-        camera_del = findViewById(R.id.camera_delete);
-        camera_edit = findViewById(R.id.camera_edit);
-        camera_edit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editCamera();
+        Button camera_del = findViewById(R.id.camera_delete);
+        Button camera_edit = findViewById(R.id.camera_edit);
+        camera_edit.setOnClickListener(view -> editCamera());
+        camera_del.setOnClickListener(view -> {
+            AlertDialog.Builder adb = new AlertDialog.Builder(context);
+            adb.setTitle("Are you sure to delete all the camera information?")
+                    .setPositiveButton("Confirm", (dialog, id) -> removeTags(pre.exifTagsList.get(2)))
+                    .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel()).show();
 
-            }
-        });
-        camera_del.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-              AlertDialog.Builder adb = new AlertDialog.Builder(context);
-                adb.setTitle("Are you sure to delete all the camera information?")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                removeTags(pre.exifTagsList.get(2));
-                            }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                }).show();
-
-            }
         });
         //date
-        date_del = findViewById(R.id.date_delete);
-        date_edit = findViewById(R.id.date_edit);
-        date_edit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editDate();
+        Button date_del = findViewById(R.id.date_delete);
+        Button date_edit = findViewById(R.id.date_edit);
+        date_edit.setOnClickListener(view -> editDate());
+        date_del.setOnClickListener(view -> {
+            AlertDialog.Builder adb = new AlertDialog.Builder(context);
+            adb.setTitle("Are you sure to delete all the date information?")
+                    .setPositiveButton("Confirm", (dialog, id) -> removeTags(pre.exifTagsList.get(1)))
+                    .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel()).show();
 
-            }
-        });
-        date_del.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder adb = new AlertDialog.Builder(context);
-                adb.setTitle("Are you sure to delete all the date information?")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                removeTags(pre.exifTagsList.get(1));
-                            }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                }).show();
-
-            }
         });
         //all delete
-        all_del = findViewById(R.id.deleteAll);
-        all_del.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-              AlertDialog.Builder adb = new AlertDialog.Builder(context);
-                adb.setTitle("Are you sure to delete all the information?")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                for(PhotoDetailPresenter pre: photoList){
-                                  pre.removeAllTags();
-                                }
-                            }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                }).show();
-                
-            }
+        Button all_del = findViewById(R.id.deleteAll);
+        all_del.setOnClickListener(view -> {
+            AlertDialog.Builder adb = new AlertDialog.Builder(context);
+            adb.setTitle("Are you sure to delete all the information?")
+                    .setPositiveButton("Confirm", (dialog, id) -> {
+                        for (PhotoDetailPresenter pre : photoList) {
+                            pre.removeAllTags();
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel()).show();
+
         });
 
     }
-      @Override
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.tool_bar_menu, menu);
         return true;
@@ -268,7 +158,7 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
 
         if (item.getItemId() == R.id.toolbar_share) {
             ArrayList<Uri> uris = new ArrayList<Uri>();
-            for(PhotoDetailPresenter pre: photoList){
+            for (PhotoDetailPresenter pre : photoList) {
                 uris.add(pre.imageUri);
             }
             boolean multiple = uris.size() > 1;
@@ -285,62 +175,51 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
             startActivity(Intent.createChooser(intent, "Share"));
 
             return true;
-        }else if(item.getItemId() == R.id.toolbar_delete){
+        } else if (item.getItemId() == R.id.toolbar_delete) {
 
             AlertDialog.Builder adb = new AlertDialog.Builder(this);
             adb.setTitle("Are you sure to delete all the information? This operation could not be reverted.")
-                    .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            for(PhotoDetailPresenter pre: photoList){
-                                pre.removeAllTags();
-                            }
+                    .setPositiveButton("Confirm", (dialog, id) -> {
+                        for (PhotoDetailPresenter pre : photoList) {
+                            pre.removeAllTags();
                         }
-                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    dialog.cancel();
-                }
-            }).show();
+                    })
+                    .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel()).show();
 
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
-    protected void openDialogMap(){
+
+    protected void openDialogMap() {
         mapDialog.show();
     }
-    protected void setDialogMap() {//ExifTagsContainer item) {
+
+    protected void setDialogMap() {
+        //ExifTagsContainer item)
 
         AlertDialog.Builder mapDialogBuilder = new AlertDialog.Builder(Batch.this);
-        final View  dialogView = LayoutInflater.from(Batch.this)
-                    .inflate(R.layout.map_dialog_two, null);
+        final View dialogView = LayoutInflater.from(Batch.this)
+                .inflate(R.layout.map_dialog_two, null);
         mapDialogBuilder.setTitle("MapDialog");
         mapDialogBuilder.setView(dialogView);
-        //refreshMapTarget(mMap);
         mapDialogBuilder.setPositiveButton("confirm",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (mMap != null) {
+                (dialog, which) -> {
+                    if (mMap != null) {
+                        pre.setExifGPS(lat, lon);
+                        pre.setLatitude(lat);
+                        pre.setLongitude(lon);
+                        for (PhotoDetailPresenter pre : photoList) {
                             pre.setExifGPS(lat, lon);
                             pre.setLatitude(lat);
                             pre.setLongitude(lon);
-                            for (PhotoDetailPresenter pre : photoList) {
-                        pre.setExifGPS(lat,lon);
-                        pre.setLatitude(lat);
-                        pre.setLongitude(lon);
-                    }
-                            refreshMapTarget(mMap);
                         }
+                        refreshMapTarget(mMap);
                     }
                 });
         mapDialogBuilder.setNegativeButton("close",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //...To-do nothing
-                        if (mMap != null) refreshMapTarget(mMap);
-                    }
+                (dialog, which) -> {
+                    if (mMap != null) refreshMapTarget(mMap);
                 });
         mapDialog = mapDialogBuilder.create();
     }
@@ -350,16 +229,8 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         mMap = googleMap;
         mMap.setOnMapClickListener(this);
         refreshMapTarget(mMap);
-//        if(temp_lon != pre.getLongitude() && temp_lat!=pre.getLatitude()) {
-//                    temp_lon = pre.getLongitude();
-//                    temp_lat = pre.getLatitude();
-//                    for (PhotoDetailPresenter pre : photoList) {
-//                        pre.setExifGPS(temp_lon, temp_lat);
-//                        pre.setLatitude(temp_lon);
-//                        pre.setLongitude(temp_lat);
-//                    }
-//                }
     }
+
     @Override
     public void onMapClick(LatLng point) {
 
@@ -375,7 +246,8 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
 
     }
-    //for 循环之后再修改
+
+    //after the for loop
     public void refreshMapTarget(GoogleMap googleMap) {
         mMap = googleMap;
         if (pre.getLatitude() != null && pre.getLongitude() != null) {
@@ -392,84 +264,89 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
     }
 
 
-    protected void editDate(){
+    protected void editDate() {
         DatePickerDialog datePickerDialog = new DatePickerDialog(Batch.this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        mYear = year;
-                        mMonth = month;
-                        mDay = dayOfMonth;
-                        String dateString = mYear + ":" + (mMonth + 1) + ":" + mDay;
-                        Date date = new Date();
-                        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                        String time = formatter.format(date);
-                        if (!(pre.getExifInterface().getAttribute(ExifInterface.TAG_DATETIME) == null)){
-                            String[] list = pre.getExifInterface().getAttribute(ExifInterface.TAG_DATETIME).split(" ");
-                            if (list.length == 2){
-                                time = list[1];
-                            }
+                (view, year, month, dayOfMonth) -> {
+                    mYear = year;
+                    mMonth = month;
+                    mDay = dayOfMonth;
+                    String dateString = mYear + ":" + (mMonth + 1) + ":" + mDay;
+                    Date date = new Date();
+                    SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+                    String time = formatter.format(date);
+                    if (!(pre.getExifInterface().getAttribute(ExifInterface.TAG_DATETIME) == null)) {
+                        String[] list = pre.getExifInterface().getAttribute(ExifInterface.TAG_DATETIME).split(" ");
+                        if (list.length == 2) {
+                            time = list[1];
                         }
-                        String dateTime = dateString + " " + time;
-                        for(PhotoDetailPresenter pre: photoList) {
-                            pre.setExifDate(dateTime);
-                        }
+                    }
+                    String dateTime = dateString + " " + time;
+                    for (PhotoDetailPresenter pre : photoList) {
+                        pre.setExifDate(dateTime);
                     }
                 },
                 mYear, mMonth, mDay);
         datePickerDialog.show();
 
     }
-//
-    protected void editCamera(){
+
+    //
+    protected void editCamera() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         // Get the layout inflater
         final LayoutInflater inflater = this.getLayoutInflater();
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        final View view  = inflater.inflate(R.layout.dialog_edit_camera, null);
+        final View view = inflater.inflate(R.layout.dialog_edit_camera, null);
         builder.setView(view)
                 // Add action buttons
-                .setPositiveButton(R.string.dialog_edit_camera_properties_confirm, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        String camera_make = ((EditText)view.findViewById(R.id.editText_camera_make)).getText().toString();
-                        String camera_model = ((EditText)view.findViewById(R.id.editText_camera_model)).getText().toString();
-                        for(PhotoDetailPresenter pre: photoList)
-                            {
-                                pre.setExifCamera(camera_make, camera_model);
-                            }
+                .setPositiveButton(R.string.dialog_edit_camera_properties_confirm, (dialog, id) -> {
+                    String camera_make = ((EditText) view.findViewById(R.id.editText_camera_make)).getText().toString();
+                    String camera_model = ((EditText) view.findViewById(R.id.editText_camera_model)).getText().toString();
+                    for (PhotoDetailPresenter pre : photoList) {
+                        pre.setExifCamera(camera_make, camera_model);
                     }
                 })
-                .setNegativeButton(R.string.dialog_edit_camera_properties_cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
+                .setNegativeButton(R.string.dialog_edit_camera_properties_cancel, (dialog, id) -> dialog.cancel());
         AlertDialog dialog_edit_camera = builder.create();
         dialog_edit_camera.show();
-
 
 
     }
 
     protected void removeTags(ExifTagsContainer item) {
+        AlertDialog.Builder adb = new AlertDialog.Builder(this);
         switch (item.getType()) {
             case DATE:
-                for(PhotoDetailPresenter pre:photoList){
-                    pre.removeExifDate();
-                }
+                adb.setTitle("Are you sure to delete the data information?")
+                        .setPositiveButton("Confirm", (dialog, id) -> {
+                            for (PhotoDetailPresenter pre : photoList) {
+                                pre.removeExifDate();
+                            }
+                        })
+                        .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel()).show();
                 break;
             case CAMERA_PROPERTIES:
-                for(PhotoDetailPresenter pre:photoList) {
-                    pre.removeExifCamera();
-                }
+                adb.setTitle("Are you sure to delete the data information?")
+                        .setPositiveButton("Confirm", (dialog, id) -> {
+                            for (PhotoDetailPresenter pre : photoList) {
+                                pre.removeExifCamera();
+                            }
+                        })
+                        .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel()).show();
+
                 break;
             case GPS:
-                for(PhotoDetailPresenter pre:photoList) {
-                    pre.removeExifGPS();
-                }
+                adb.setTitle("Are you sure to delete the GPS information?")
+                        .setPositiveButton("Confirm", (dialog, id) -> {
+                            pre.removeExifGPS();
+                            for (PhotoDetailPresenter pre : photoList) {
+                                pre.removeExifGPS();
+                            }
+                        })
+                        .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel()).show();
+
         }
     }
 
@@ -478,8 +355,6 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         setResult(Activity.RESULT_CANCELED);
         super.onBackPressed();
     }
-
-
 
 
     public class ImageGridAdapter extends BaseAdapter {

@@ -38,7 +38,6 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
                     <ImageView
-                        android:id="@+id/image_photo_gps"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_pin_drop_primary_24dp"
@@ -70,7 +69,6 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
                     <ImageView
-                        android:id="@+id/image_photo_camera"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_photo_camera_primary_24dp"
@@ -102,7 +100,6 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
                     <ImageView
-                        android:id="@+id/image_photo_date"
                         android:layout_width="match_parent"
                         android:src="@drawable/ic_date_range_primary_24dp"
                         android:layout_height="wrap_content"
