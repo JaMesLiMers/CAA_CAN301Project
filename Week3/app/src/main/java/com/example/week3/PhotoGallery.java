@@ -58,7 +58,7 @@ public class PhotoGallery extends Activity {
     private Button btnSearch;
     private EditText strSearch;
     private View notFound;
-
+    private ImageAdapter initAdapter;
     private ImageAdapter imageAdapter;
     private String[] all_arrPath;
     private boolean[] all_thumbnailsselection;
@@ -102,7 +102,7 @@ public class PhotoGallery extends Activity {
     }
 
     private void init(){
-
+        Log.i(TAG, "init: aaaaaaaaa");
         downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         grdImages= (GridView) findViewById(R.id.gridImages);
         // 确定按钮
@@ -119,7 +119,7 @@ public class PhotoGallery extends Activity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length()==0) {
                     searchbar.setCompoundDrawablesWithIntrinsicBounds(R.drawable.places_ic_search, 0, 0, 0);
-                    search("");
+                    grdImages.setAdapter((ListAdapter) initAdapter);
                     searchbar.setOnTouchListener(null);
                 }else {
                     String input = searchbar.getText().toString();
@@ -140,7 +140,7 @@ public class PhotoGallery extends Activity {
                         {
                             searchbar.setText("");
                             searchbar.setCompoundDrawablesWithIntrinsicBounds(R.drawable.places_ic_search, 0, 0, 0);
-                            search("");
+                            grdImages.setAdapter((ListAdapter) imageAdapter);
                             return true;
                         }
                         return false;
@@ -228,7 +228,7 @@ public class PhotoGallery extends Activity {
             // 设置path
             all_arrPath[i] = imagecursor.getString(dataColumnIndex);
         }
-        imageAdapter = new ImageAdapter(all_ids.length, all_ids);
+        initAdapter= imageAdapter = new ImageAdapter(all_ids.length, all_ids);
         grdImages.setAdapter((ListAdapter) imageAdapter);
 
         // 确认选择回调函数
