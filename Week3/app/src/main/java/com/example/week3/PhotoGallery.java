@@ -253,7 +253,7 @@ public class PhotoGallery extends Activity {
     private static final int PERMISSION_REQUEST_PHOTO = 2;
     private void RequestPhotoPreview() {
         // Permission has not been granted and must be requested.
-        ActivityCompat.requestPermissions(PhotoGallery.this,
+        ActivityCompat.requestPermissions(PhotoGallery.this,0
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_PHOTO);
     }
     @Override
