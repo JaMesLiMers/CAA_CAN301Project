@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Week3</string>
+    <string name="app_name">Exifer</string>
     <string name="title_activity_test">TestActivity</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
@@ -67,4 +67,10 @@
 
     <string name="text_share">Share photo</string>
     <string name="text_delete">Delete all tags</string>
+    <string name="text_search_hint">Please input URL to download online photos or location to search local photo…</string>
+    <string name="nothing">nothing</string>
+    <string name="not_exist">Sorry, the photo you searched does not exist.</string>
+    <string name="edit">edit</string>
+    <string name="edit_notice">select photos to edit</string>
+
 </resources>

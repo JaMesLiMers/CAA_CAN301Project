@@ -42,9 +42,9 @@ public class CustomPhotoGalleryActivity extends Activity {
     private boolean[] all_thumbnailsselection;
     private int all_ids[];
     private int all_count;
-    private double all_lat_long[][];
+    private double[][] all_lat_long;
     private String all_city[];
-
+    private int checked=0;
 
     /**
      * Overrides methods
@@ -52,7 +52,10 @@ public class CustomPhotoGalleryActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_custom_photo_gallery);
+        setContentView(R.layout.photos);
+        Intent intent = getIntent();
+        String keyword = intent.getStringExtra("keyword");
+        if (keyword==null)keyword="";
         // 所有图片
         grdImages= (GridView) findViewById(R.id.grdImages);
         // 确定按钮
@@ -60,8 +63,8 @@ public class CustomPhotoGalleryActivity extends Activity {
         // 搜索按钮
         btnSearch= (Button) findViewById(R.id.btnSearch);
         // 搜索文字
-        strSearch =(EditText)findViewById(R.id.strSearch);
-
+        strSearch =(EditText)findViewById(R.id.searchSeparate);
+        strSearch.setText(keyword);
         final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID }; //{"_data, _id"}
         final String orderBy = MediaStore.Images.Media._ID; // "_id"
 
@@ -86,7 +89,6 @@ public class CustomPhotoGalleryActivity extends Activity {
             // 设置path
             all_arrPath[i] = imagecursor.getString(dataColumnIndex);
 
-
         }
         // 获取所有的lat lon信息
         getAllLatLon();
@@ -101,35 +103,7 @@ public class CustomPhotoGalleryActivity extends Activity {
         // 查询完毕关闭cursor
         imagecursor.close();
 
-        // 搜索回调函数
-        btnSearch.setOnClickListener(new View.OnClickListener() {
 
-            public void onClick(View v) {
-                // 清空结果
-                grdImages.setAdapter(null);
-
-                // 获取文字
-                String strSearch_="";
-                strSearch_=strSearch.getText().toString().toLowerCase();
-
-                int count = 0;
-                ArrayList ids_ = new ArrayList<Integer>();
-
-                // 按照搜索过滤所有的图片
-                for (int i = 0; i < all_count; i++) {
-                    if (all_city[i].toLowerCase().equals(strSearch_)){
-                        count += 1;
-                        ids_.add(all_ids[i]);
-                    }
-                }
-                // int[]
-                int[] ids = ids_.stream().mapToInt(i -> (int) i).toArray();
-
-                // 设定图片预览 （下面的class负责）
-                imageAdapter = new ImageAdapter(count, ids);
-                grdImages.setAdapter((ListAdapter) imageAdapter);
-            }
-        });
 
         // 确认选择回调函数
         btnSelect.setOnClickListener(new View.OnClickListener() {
@@ -147,7 +121,6 @@ public class CustomPhotoGalleryActivity extends Activity {
                 if (cnt == 0) {
                     Toast.makeText(getApplicationContext(), "Please select at least one image", Toast.LENGTH_LONG).show();
                 } else {
-
                     Log.d("SelectedImages", selectImages);
                     Intent i = new Intent();
                     i.putExtra("data", selectImages);
@@ -157,6 +130,33 @@ public class CustomPhotoGalleryActivity extends Activity {
             }
         });
 
+        search();
+
+    }
+
+    public void search(){
+        grdImages.setAdapter(null);
+
+        // 获取文字
+        String strSearch_="";
+        strSearch_=strSearch.getText().toString().toLowerCase();
+
+        int count = 0;
+        ArrayList ids_ = new ArrayList<Integer>();
+
+        // 按照搜索过滤所有的图片
+        for (int i = 0; i < all_count; i++) {
+            if (all_city[i].toLowerCase().equals(strSearch_)){
+                count += 1;
+                ids_.add(all_ids[i]);
+            }
+        }
+        // int[]
+        int[] ids = ids_.stream().mapToInt(i -> (int) i).toArray();
+
+        // 设定图片预览 （下面的class负责）
+        imageAdapter = new ImageAdapter(count, ids);
+        grdImages.setAdapter((ListAdapter) imageAdapter);
     }
 
     public boolean getAllLatLon(){
@@ -239,6 +239,9 @@ public class CustomPhotoGalleryActivity extends Activity {
         }
     }
 
+    private void updateTheTextOnEditButton(){
+
+    }
 
     @Override
     public void onBackPressed() {
@@ -339,9 +342,11 @@ public class CustomPhotoGalleryActivity extends Activity {
                     if (all_thumbnailsselection[id]) {
                         holder.chkImage.setChecked(false);
                         all_thumbnailsselection[id] = false;
+                        checked-=1;
                     } else {
                         holder.chkImage.setChecked(true);
                         all_thumbnailsselection[id] = true;
+                        checked+=1;
                     }
                 }
             });

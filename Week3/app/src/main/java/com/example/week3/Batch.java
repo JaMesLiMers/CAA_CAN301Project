@@ -141,9 +141,9 @@ public class Batch extends AppCompatActivity implements OnMapReadyCallback, Goog
         mMonth = ca.get(Calendar.MONTH);
         mDay = ca.get(Calendar.DAY_OF_MONTH);
 
-        ((ImageView) findViewById(R.id.image_photo_gps)).setImageResource(R.drawable.ic_pin_drop_black_24dp);
-        ((ImageView) findViewById(R.id.image_photo_camera)).setImageResource(R.drawable.ic_photo_camera_black_24dp);
-        ((ImageView) findViewById(R.id.image_photo_date)).setImageResource(R.drawable.ic_date_range_black_24dp);
+//        ((ImageView) findViewById(R.id.image_photo_gps)).setImageResource(R.drawable.ic_pin_drop_black_24dp);
+//        ((ImageView) findViewById(R.id.image_photo_camera)).setImageResource(R.drawable.ic_photo_camera_black_24dp);
+//        ((ImageView) findViewById(R.id.image_photo_date)).setImageResource(R.drawable.ic_date_range_black_24dp);
 
 
         //gps

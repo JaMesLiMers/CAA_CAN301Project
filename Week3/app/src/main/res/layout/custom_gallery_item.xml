@@ -5,8 +5,11 @@
 
     <ImageView
         android:id="@+id/imgThumb"
-        android:layout_width="100dp"
-        android:layout_height="100dp" />
+        android:scaleType="centerCrop"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+
+        />
 
     <CheckBox
         android:id="@+id/chkImage"

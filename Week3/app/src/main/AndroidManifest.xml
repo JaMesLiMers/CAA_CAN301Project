@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.week3">
-    <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -42,7 +41,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/maps_api_key" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".PhotoGallery">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <!-- This activity is the entry point for this app -->
@@ -54,7 +53,7 @@
         </activity>
         <activity android:name=".Detail">
         </activity>
-        <activity android:name=".PhotoGallery">
+        <activity android:name=".MainActivity">
         </activity>
         <activity android:name=".Batch">
         </activity>
